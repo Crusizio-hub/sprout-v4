@@ -652,7 +652,7 @@ function showApp() {
 // ONBOARDING
 // ════════════════════════════════════════
 var obStep = 0;
-var OB_STEPS = ['welcome','lang','name','companion','done'];
+var OB_STEPS = ['lang','welcome','name','companion','tutorial','done'];
 
 function showOnboarding() {
   hideLoading();
@@ -675,10 +675,13 @@ function renderObStep() {
   var progress = obStep > 0 && obStep < OB_STEPS.length-1 ? '<div class="ob-progress">' + dots + '</div>' : '';
 
   if (step === 'welcome') {
+    var isEN_w = (S.ob.lang || 'es') === 'en';
     body.innerHTML = progress +
-      '<div class="ob-q" style="text-align:center;margin-bottom:12px">Tu espacio para el cambio</div>' +
-      '<div class="ob-desc" style="text-align:center">En Sprout vas a tener un lugar para plantar lo que querés que crezca en tu vida. Y una compañera que te acompaña, que recuerda lo que le contás, que no te juzga.<br><br>No hace falta tener todo claro. Solo estar acá ya es suficiente.</div>' +
-      '<button class="btn primary full" onclick="obNext()">Empezar →</button>';
+      '<div class="ob-q" style="text-align:center;margin-bottom:12px">' + (isEN_w ? 'Your space for change' : 'Tu espacio para el cambio') + '</div>' +
+      '<div class="ob-desc" style="text-align:center">' + (isEN_w
+        ? "In Sprout you'll have a place to plant what you want to grow in your life. A companion who accompanies you, remembers what you share, and never judges you.<br><br>You don't need to have it all figured out. Just being here is enough."
+        : 'En Sprout vas a tener un lugar para plantar lo que querés que crezca en tu vida. Y una compañera que te acompaña, que recuerda lo que le contás, que no te juzga.<br><br>No hace falta tener todo claro. Solo estar acá ya es suficiente.') + '</div>' +
+      '<button class="btn primary full" onclick="obNext()">' + (isEN_w ? 'Start →' : 'Empezar →') + '</button>';
   }
   else if (step === 'lang') {
     body.innerHTML = progress +
@@ -720,6 +723,26 @@ function renderObStep() {
       '<div style="margin:14px 0 6px;font-size:12px;color:var(--t2);font-weight:500">' + genderQ + '</div>' +
       '<div class="ob-gender-row">' + genderBtns + '</div>' +
       '<button class="btn primary full" onclick="obNext()">' + (isEN ? 'Meet ' + (S.ob.companion||'Fern') + ' →' : 'Conocer a ' + (S.ob.companion||'Fern') + ' →') + '</button>';
+  }
+  else if (step === 'tutorial') {
+    var isEN_t = (S.ob.lang || 'es') === 'en';
+    var aiN_t  = S.aiName || S.ob.companion || 'Fern';
+    var tItems = [
+      { icon:'🌱', title:'Seeds',   desc: isEN_t ? 'One small concrete action for today. The more specific, the easier to start.' : 'Una acción concreta y pequeña para hoy. Cuanto más específica, más fácil arrancar.' },
+      { icon:'🌿', title:'Sprouts', desc: isEN_t ? 'A direction in life, not a goal. Something you want to be different — clear or vague.' : 'Una dirección de vida, no una meta. Algo que querés que sea diferente — claro o difuso.' },
+      { icon:'💬', title: aiN_t,    desc: isEN_t ? 'Your companion. She learns about you over time — from conversations, not interrogation. No judgment, ever.' : 'Tu compañera. Aprende sobre vos con el tiempo — de las conversaciones, no de interrogatorios. Sin juicios, nunca.' }
+    ];
+    body.innerHTML = progress +
+      '<div class="ob-q" style="margin-bottom:14px">' + (isEN_t ? 'How it works' : 'Cómo funciona') + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:9px;margin-bottom:18px">' +
+        tItems.map(function(it) {
+          return '<div style="background:var(--b2);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:flex-start">' +
+            '<span style="font-size:22px;flex-shrink:0">' + it.icon + '</span>' +
+            '<div><div style="font-weight:600;font-size:13px;color:var(--t1);margin-bottom:3px">' + it.title + '</div>' +
+            '<div style="font-size:12px;color:var(--t2);line-height:1.6">' + it.desc + '</div></div></div>';
+        }).join('') +
+      '</div>' +
+      '<button class="btn primary full" onclick="obNext()">' + (isEN_t ? 'Ready →' : 'Listo →') + '</button>';
   }
 
   body.classList.remove('fade-in');
@@ -765,6 +788,9 @@ function obNext() {
     if (!S.ob.gender)    S.ob.gender    = 'none';
     S.aiName   = S.ob.companion;
     S.aiGender = S.ob.gender;
+    obStep++; renderObStep(); return;
+  }
+  if (step === 'tutorial') {
     S.onboarded = true;
     saveLocal();
     obFinish();
