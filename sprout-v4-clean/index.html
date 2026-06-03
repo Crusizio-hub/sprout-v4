@@ -1,0 +1,2244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#4a7c59">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sprout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root {
+  --g:    #4a7c59;
+  --g2:   #6a9e78;
+  --mint: #d4e8da;
+  --sage: #a8c4b0;
+  --b0:   #faf7f2;
+  --b1:   #f5efe6;
+  --b2:   #ede4d8;
+  --b3:   #e0d5c8;
+  --t1:   #2d2416;
+  --t2:   #6b5a48;
+  --t3:   #9e8c7c;
+  --bd:   #d8ccbf;
+  --err:  #c0604a;
+  --r:    12px;
+  --r2:   18px;
+  --r3:   26px;
+  --fn:   'Nunito', sans-serif;
+  --fd:   'Lora', serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:var(--fn);font-size:15px;background:var(--b0);color:var(--t1);overflow:hidden}
+button,input,select,textarea{font-family:var(--fn)}
+button{cursor:pointer}
+.hidden{display:none!important}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.fade-in{animation:fadeUp .25s ease}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--b0);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+#loading .plant{font-size:52px;animation:sway 2s ease-in-out infinite;margin-bottom:16px}
+#loading .brand{font-family:var(--fd);font-size:28px;color:var(--g);margin-bottom:8px}
+#loading .sub{font-size:13px;color:var(--t3)}
+
+/* ONBOARDING */
+#onboarding{position:fixed;inset:0;background:var(--b2);display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;z-index:50}
+.ob-card{background:var(--b0);border-radius:var(--r3);width:100%;max-width:440px;box-shadow:0 8px 40px rgba(74,60,40,.15);overflow:hidden}
+.ob-hero{background:linear-gradient(160deg,var(--mint),var(--b2));padding:36px 26px 24px;text-align:center}
+.ob-plant{font-size:58px;display:block;margin-bottom:12px;animation:sway 3s ease-in-out infinite}
+.ob-title{font-family:var(--fd);font-size:30px;color:var(--g);margin-bottom:5px}
+.ob-tagline{font-size:13px;color:var(--t2);line-height:1.6}
+.ob-body{padding:24px}
+.ob-progress{display:flex;gap:5px;margin-bottom:22px}
+.ob-dot{height:3px;border-radius:2px;background:var(--bd);flex:1;transition:background .3s}
+.ob-dot.done{background:var(--g)}
+.ob-q{font-family:var(--fd);font-size:18px;color:var(--t1);margin-bottom:16px;line-height:1.4}
+.ob-desc{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:20px}
+.ob-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.ob-opt{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:var(--r);border:1.5px solid var(--bd);background:transparent;color:var(--t2);font-size:13px;transition:all .15s;text-align:left;width:100%}
+.ob-opt:hover,.ob-opt.sel{border-color:var(--g);background:var(--mint);color:var(--g)}
+.ob-opt-icon{font-size:22px;flex-shrink:0}
+.ob-opt-info{flex:1}
+.ob-opt-name{font-weight:600;margin-bottom:2px}
+.ob-opt-desc{font-size:11px;opacity:.8}
+.ob-name-input{width:100%;padding:12px 14px;font-size:16px;background:var(--b2);border:1.5px solid var(--bd);border-radius:var(--r);color:var(--t1);outline:none;margin-bottom:16px;transition:border-color .12s}
+.ob-name-input:focus{border-color:var(--g)}
+.ob-gender-row{display:flex;gap:8px;margin-bottom:16px}
+.ob-gender-btn{flex:1;padding:10px 6px;border-radius:var(--r);border:1.5px solid var(--bd);background:transparent;font-size:13px;color:var(--t2);transition:all .15s}
+.ob-gender-btn.sel{border-color:var(--g);background:var(--mint);color:var(--g)}
+
+/* APP */
+#app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
+
+/* TOPBAR */
+.topbar{background:var(--b0);border-bottom:1px solid var(--bd);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.topbar-brand{display:flex;align-items:center;gap:8px}
+.topbar-brand-name{font-family:var(--fd);font-size:16px;color:var(--g);font-weight:600}
+.topbar-actions{display:flex;gap:6px}
+.icon-btn{width:34px;height:34px;border-radius:9px;border:none;background:transparent;color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .12s}
+.icon-btn:hover{background:var(--b2)}
+
+/* SIDEBAR */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(45,36,22,.5);z-index:100}
+.sidebar-overlay.open{display:block}
+.sidebar{position:fixed;top:0;left:0;height:100dvh;width:240px;background:var(--b0);border-right:1.5px solid var(--bd);z-index:200;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.sidebar.open{transform:translateX(0)}
+.sidebar-hd{padding:18px 16px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.sidebar-hd-name{font-family:var(--fd);font-size:16px;color:var(--g)}
+.sidebar-nav{padding:8px 0;overflow-y:auto;flex:1}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:14px;color:var(--t2);border:none;background:transparent;width:100%;text-align:left;transition:all .12s}
+.sidebar-item:hover{background:var(--b2);color:var(--t1)}
+.sidebar-user{padding:12px 16px;border-top:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.sidebar-user-avatar{width:32px;height:32px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+.sidebar-user-name{font-size:13px;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-logout{font-size:11px;color:var(--t3);border:none;background:transparent;cursor:pointer}
+
+/* PAGES */
+.pages{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:0}
+.page{display:none;flex-direction:column;gap:14px;padding:16px 16px 100px}
+.page.active{display:flex}
+
+/* BOTTOM NAV */
+.bnav{background:var(--b0);border-top:1px solid var(--bd);display:flex;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));flex-shrink:0}
+.bn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 10px;color:var(--t3);font-size:10px;font-weight:500;min-width:52px;border:none;background:transparent;transition:color .12s}
+.bn.active{color:var(--g)}
+.bn-icon{font-size:22px;line-height:1;margin-bottom:1px}
+
+/* CARDS */
+.card{background:var(--b0);border:1.5px solid var(--bd);border-radius:var(--r2);overflow:hidden}
+.page-hd{padding:2px 2px 4px}
+.page-hd-title{font-family:var(--fd);font-size:20px;color:var(--g);margin-bottom:3px}
+.page-hd-desc{font-size:13px;color:var(--t2);line-height:1.6}
+
+/* CHECKIN */
+.checkin{background:linear-gradient(160deg,var(--mint),var(--b1));border-radius:var(--r2);padding:20px;border:1.5px solid var(--sage)}
+.checkin-hi{font-family:var(--fd);font-size:21px;color:var(--g);margin-bottom:4px}
+.checkin-sub{font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.5}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.mood-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;border-radius:var(--r);border:1.5px solid var(--bd);background:rgba(255,255,255,.55);transition:all .15s}
+.mood-btn:hover,.mood-btn.active{border-color:var(--g);background:#fff;box-shadow:0 2px 12px rgba(74,124,89,.13)}
+.mood-emoji{font-size:26px}
+.mood-label{font-size:10px;color:var(--t2);font-weight:500;text-align:center}
+
+/* SOFIA RESPONSE */
+.sofia-response{background:linear-gradient(135deg,var(--mint),var(--b2));border-radius:var(--r2);padding:16px;border:1.5px solid var(--sage)}
+.sofia-av{width:34px;height:34px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sofia-response-name{font-family:var(--fd);font-size:12px;color:var(--g);font-weight:600}
+.sofia-response-msg{font-size:13px;color:var(--t1);line-height:1.7;font-family:var(--fd);font-style:italic;margin:8px 0 12px}
+.sofia-response-btn{width:100%;padding:9px;border-radius:var(--r);background:var(--g);border:none;color:#fff;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px}
+.sofia-response-btn:hover{background:#3a6449}
+.sofia-response-btn.ghost{background:transparent;border:1.5px solid var(--sage);color:var(--g);margin-top:7px}
+
+/* HARD DAY */
+.hardday{background:linear-gradient(160deg,#f5f0eb,var(--b2));border-radius:var(--r2);padding:22px 18px;text-align:center;border:1.5px solid var(--b3)}
+.hardday-emoji{font-size:42px;display:block;margin-bottom:11px}
+.hardday-title{font-family:var(--fd);font-size:19px;color:var(--t1);margin-bottom:7px}
+.hardday-text{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:16px}
+.hardday-quote{font-family:var(--fd);font-style:italic;font-size:14px;color:#8b6f47;padding:12px 16px;background:rgba(255,255,255,.5);border-radius:var(--r);border-left:3px solid #b8956a;margin-bottom:16px;text-align:left;line-height:1.6}
+
+/* SEEDS */
+.seed-card{border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--b0);overflow:hidden;transition:all .2s}
+.seed-card.done{opacity:.7}
+.seed-card-top{padding:14px 15px;display:flex;align-items:center;gap:12px}
+.seed-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.seed-name{font-size:15px;font-weight:600;color:var(--t1);line-height:1.3}
+.seed-sprout-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--g2);font-weight:500;margin-top:3px}
+.seed-check{width:36px;height:36px;border-radius:50%;border:2px solid var(--bd);background:transparent;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .25s;cursor:pointer}
+.seed-check:hover{border-color:var(--g2);background:var(--mint)}
+.seed-check.done{border-color:var(--g);background:var(--g);color:#fff}
+.seed-fern-tip{margin:0 15px 13px;padding:10px 12px;background:linear-gradient(135deg,var(--mint),var(--b1));border-radius:var(--r);border-left:3px solid var(--sage);display:flex;gap:8px;align-items:flex-start}
+.seed-fern-tip-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.seed-fern-tip-text{font-size:12px;color:var(--t2);line-height:1.6;font-style:italic}
+.seed-streak{padding:0 15px 13px;display:flex;gap:4px;align-items:center}
+.seed-streak-dot{width:7px;height:7px;border-radius:50%;background:var(--bd);transition:background .3s}
+.seed-streak-dot.done{background:var(--g)}
+.seed-streak-dot.today{width:9px;height:9px;border:2px solid var(--g)}
+.seed-progress{height:2px;background:var(--mint);margin:0 15px 13px;border-radius:2px}
+.seed-progress-bar{height:2px;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+@keyframes seedBloom{0%{transform:scale(1)}30%{transform:scale(1.18)}60%{transform:scale(.95)}100%{transform:scale(1)}}
+.seed-check.bloom{animation:seedBloom .4s ease}
+
+/* SPROUTS */
+.sprout-card{border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--b0);overflow:hidden}
+.sprout-card-hd{padding:16px 16px 12px;border-bottom:1px solid var(--bd)}
+.sprout-name{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:4px;font-family:var(--fd)}
+.sprout-why{font-size:12px;color:var(--t2);line-height:1.5;font-style:italic}
+.sprout-sofia{padding:12px 15px;border-bottom:1px solid var(--bd);display:flex;gap:10px;align-items:flex-start}
+.sprout-sofia-name{font-size:10px;color:var(--g2);font-weight:600;margin-bottom:3px}
+.sprout-sofia-msg{font-size:12px;color:var(--t2);line-height:1.6;font-style:italic}
+.sprout-actions{padding:10px 15px;display:flex;gap:7px;flex-wrap:wrap}
+
+/* COMPANION CARD */
+.companion-card{background:linear-gradient(135deg,var(--mint),var(--b2));border-radius:var(--r2);padding:16px;border:1.5px solid var(--sage);display:flex;align-items:center;gap:13px;cursor:pointer;transition:all .15s}
+.companion-card:hover{border-color:var(--g2)}
+.companion-av{width:42px;height:42px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.companion-name{font-family:var(--fd);font-size:14px;color:var(--g);font-weight:600}
+.companion-sub{font-size:12px;color:var(--t2);margin-top:2px}
+
+/* CHAT */
+.sofia-bar{background:linear-gradient(135deg,var(--mint),var(--b2));border-radius:var(--r2);padding:14px;border:1.5px solid var(--sage);display:flex;align-items:center;gap:12px}
+.sofia-bar-name{font-family:var(--fd);font-size:15px;color:var(--g);font-weight:600}
+.sofia-bar-status{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px;margin-top:2px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 2s infinite}
+.chat-box{display:flex;flex-direction:column;background:var(--b0);border:1.5px solid var(--bd);border-radius:var(--r2);overflow:hidden}
+.chat-msgs{overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:9px;min-height:200px;max-height:52vh;-webkit-overflow-scrolling:touch}
+.msg{max-width:86%}
+.msg.ai{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-who{font-size:10px;color:var(--t3);margin-bottom:3px;font-weight:500}
+.bubble{padding:9px 13px;border-radius:13px;font-size:13px;line-height:1.65;white-space:pre-wrap}
+.ai .bubble{background:var(--b2);color:var(--t1);border-bottom-left-radius:3px}
+.user .bubble{background:var(--g);color:#fff;border-bottom-right-radius:3px}
+.typing span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--t3);margin:0 2px;animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+.chat-footer{border-top:1px solid var(--bd)}
+.chat-input-row{display:flex;gap:7px;padding:9px 11px;align-items:flex-end}
+.chat-input{flex:1;padding:8px 12px;font-size:13px;background:var(--b2);border:1.5px solid var(--bd);border-radius:var(--r);color:var(--t1);resize:none;outline:none;min-height:38px;max-height:100px;line-height:1.5;transition:border-color .12s}
+.chat-input:focus{border-color:var(--g)}
+.send-btn{width:38px;height:38px;border-radius:var(--r);background:var(--g);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.send-btn:hover{background:#3a6449}
+
+/* PROFILE */
+.profile-hero{background:linear-gradient(160deg,var(--mint),var(--b2));border-radius:var(--r2);padding:20px;border:1.5px solid var(--sage);display:flex;align-items:center;gap:14px}
+.profile-av{width:56px;height:56px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;cursor:pointer}
+.profile-name{font-family:var(--fd);font-size:20px;color:var(--g)}
+.profile-since{font-size:11px;color:var(--t3);margin-top:2px}
+.profile-field{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:var(--b0);border:1.5px solid var(--bd);border-radius:var(--r);margin-bottom:7px;cursor:pointer;transition:all .15s}
+.profile-field:hover{border-color:var(--g2);background:var(--mint)}
+.profile-field-ico{font-size:18px;flex-shrink:0;margin-top:1px}
+.profile-field-lbl{font-size:11px;color:var(--t3);font-weight:500;margin-bottom:2px}
+.profile-field-val{font-size:13px;color:var(--t1);line-height:1.5}
+.profile-field-empty{font-size:13px;color:var(--t3);font-style:italic}
+.section-title{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;padding:0 2px}
+
+/* MODAL */
+#modal{position:fixed;inset:0;background:rgba(45,36,22,.55);z-index:300;display:none;align-items:flex-end;justify-content:center}
+#modal.open{display:flex}
+.modal-sheet{background:var(--b0);border-radius:var(--r3) var(--r3) 0 0;padding:22px 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:500px;max-height:80dvh;overflow-y:auto}
+.modal-title{font-family:var(--fd);font-size:17px;color:var(--t1);margin-bottom:16px}
+
+/* FORMS */
+.field{margin-bottom:11px}
+.field-label{font-size:12px;color:var(--t2);margin-bottom:5px;display:block;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;font-size:13px;background:var(--b2);border:1.5px solid var(--bd);border-radius:var(--r);color:var(--t1);outline:none;transition:border-color .12s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--g)}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5}
+
+/* BUTTONS */
+.btn{padding:9px 15px;border-radius:var(--r);border:1.5px solid var(--bd);background:transparent;color:var(--t1);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .12s;cursor:pointer}
+.btn:hover{background:var(--b2);border-color:var(--bd)}
+.btn.primary{background:var(--g);border-color:var(--g);color:#fff}
+.btn.primary:hover{background:#3a6449;border-color:#3a6449}
+.btn.soft{background:var(--mint);border-color:var(--sage);color:var(--g)}
+.btn.soft:hover{background:var(--sage)}
+.btn.ghost{border-color:transparent;color:var(--t3)}
+.btn.ghost:hover{background:var(--b2);color:var(--t1);border-color:var(--bd)}
+.btn.sm{padding:5px 11px;font-size:12px}
+.btn.full{width:100%;justify-content:center}
+.btn.danger{border-color:var(--err);color:var(--err)}
+.btn.danger:hover{background:var(--err);color:#fff}
+
+/* SHORTCUTS */
+#shortcut-menu{display:none;position:absolute;bottom:60px;left:11px;right:11px;background:var(--b0);border:1.5px solid var(--bd);border-radius:var(--r2);overflow:hidden;box-shadow:0 4px 20px rgba(45,36,22,.12);z-index:50}
+.shortcut-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border:none;background:transparent;width:100%;text-align:left;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .12s}
+.shortcut-item:last-child{border-bottom:none}
+.shortcut-item:hover{background:var(--mint)}
+.shortcut-cmd{font-size:12px;font-weight:600;color:var(--g);font-family:monospace;flex-shrink:0}
+.shortcut-desc{font-size:12px;color:var(--t2)}
+.empty{text-align:center;padding:28px 16px}
+.empty-icon{font-size:38px;display:block;margin-bottom:10px}
+.empty-title{font-family:var(--fd);font-size:16px;color:var(--t1);margin-bottom:6px}
+.empty-text{font-size:13px;color:var(--t2);line-height:1.6}
+
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--bd)}
+.setting-row:last-child{border-bottom:none}
+.setting-row.col{flex-direction:column;align-items:flex-start;gap:8px}
+.setting-label{font-size:13px;font-weight:500;color:var(--t1)}
+.setting-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.setting-input{padding:6px 10px;font-size:13px;background:var(--b2);border:1.5px solid var(--bd);border-radius:var(--r);color:var(--t1);outline:none}
+.setting-input:focus{border-color:var(--g)}
+
+/* COLOR + ICON PICKERS */
+.color-picker{display:flex;gap:8px;flex-wrap:wrap}
+.color-dot{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all .15s}
+.color-dot.sel{border-color:#fff;transform:scale(1.15);box-shadow:0 0 0 2px var(--g)}
+.icon-picker{display:flex;gap:6px;flex-wrap:wrap}
+.icon-opt{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--bd);background:transparent;font-size:18px;transition:all .15s;cursor:pointer}
+.icon-opt:hover,.icon-opt.sel{background:var(--mint);border-color:var(--g)}
+.day-pills{display:flex;gap:5px;flex-wrap:wrap}
+.day-pill{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--bd);background:transparent;font-size:11px;font-weight:600;color:var(--t2);transition:all .15s;cursor:pointer}
+.day-pill.sel{background:var(--g);border-color:var(--g);color:#fff}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--b0);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px;z-index:40}
+.login-plant{font-size:52px;animation:sway 3s ease-in-out infinite;margin-bottom:16px;display:block;text-align:center}
+.login-title{font-family:var(--fd);font-size:26px;color:var(--g);text-align:center;margin-bottom:8px}
+.login-sub{font-size:13px;color:var(--t2);text-align:center;line-height:1.7;margin-bottom:32px;max-width:320px}
+.login-google-btn{display:flex;align-items:center;gap:12px;padding:14px 24px;border-radius:var(--r2);border:1.5px solid var(--bd);background:#fff;font-size:14px;font-weight:500;color:var(--t1);cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.login-google-btn:hover{border-color:var(--g);box-shadow:0 4px 16px rgba(74,124,89,.15)}
+.login-google-icon{width:20px;height:20px}
+.login-skip{margin-top:16px;font-size:12px;color:var(--t3);background:transparent;border:none;cursor:pointer;text-decoration:underline}
+.login-privacy{font-size:11px;color:var(--t3);text-align:center;line-height:1.6;margin-top:24px;max-width:300px}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <span class="plant">🌱</span>
+  <div class="brand">Sprout</div>
+  <div class="sub">Cargando...</div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <div class="ob-card">
+    <div class="ob-hero">
+      <span class="ob-plant">🌱</span>
+      <div class="ob-title">Sprout</div>
+      <div class="ob-tagline">El cambio real deja huella.</div>
+    </div>
+    <div class="ob-body" id="ob-body"></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <span class="login-plant">🌿</span>
+  <div class="login-title" id="login-title">Guardá tu progreso</div>
+  <div class="login-sub" id="login-sub">Entrá con Google para que tu compañera te recuerde entre sesiones. Tus datos son solo tuyos.</div>
+  <button class="login-google-btn" onclick="loginWithGoogle()">
+    <svg class="login-google-icon" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
+    <span id="login-btn-text">Entrar con Google</span>
+  </button>
+  <button class="login-skip" id="login-skip" onclick="skipLogin()">Continuar sin cuenta</button>
+  <div class="login-privacy" id="login-privacy">Tus datos son tuyos. Sprout no los vende ni los comparte con nadie. Tu diario privado nunca es leído por nosotros ni por tu compañera.</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-hd">
+      <div style="display:flex;align-items:center;gap:8px"><span>🌱</span><span class="sidebar-hd-name">Sprout</span></div>
+      <button class="icon-btn" onclick="closeSidebar()">✕</button>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-user" id="sidebar-user"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <button class="icon-btn" onclick="openSidebar()">☰</button>
+      <span style="font-size:22px">🌱</span>
+      <span class="topbar-brand-name">Sprout</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="nav('sofia')">💬</button>
+      <button class="icon-btn" onclick="nav('ajustes')">⚙️</button>
+    </div>
+  </header>
+
+  <main class="pages" id="pages">
+    <section class="page" id="page-inicio"></section>
+    <section class="page" id="page-seeds"></section>
+    <section class="page" id="page-sprouts"></section>
+    <section class="page" id="page-sofia"></section>
+    <section class="page" id="page-sobre"></section>
+    <section class="page" id="page-diario"></section>
+    <section class="page" id="page-aprendizaje"></section>
+    <section class="page" id="page-ajustes"></section>
+  </main>
+
+  <nav class="bnav">
+    <button class="bn active" id="bn-inicio" onclick="nav('inicio')">
+      <span class="bn-icon">🏠</span><span id="bn-inicio-lbl">Inicio</span>
+    </button>
+    <button class="bn" id="bn-seeds" onclick="nav('seeds')">
+      <span class="bn-icon">🌱</span><span>Seeds</span>
+    </button>
+    <button class="bn" id="bn-sprouts" onclick="nav('sprouts')">
+      <span class="bn-icon">🌿</span><span>Sprouts</span>
+    </button>
+    <button class="bn" id="bn-sofia" onclick="nav('sofia')">
+      <span class="bn-icon">💬</span><span id="bn-sofia-lbl">Fern</span>
+    </button>
+    <button class="bn" id="bn-sobre" onclick="nav('sobre')">
+      <span class="bn-icon">👤</span><span id="bn-sobre-lbl">Sobre vos</span>
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div id="modal" onclick="onModalBg(event)">
+  <div class="modal-sheet">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════
+// CONFIG — cargada desde el servidor
+// ════════════════════════════════════════
+var CFG = { supabase_url: '', supabase_key: '' };
+
+// ════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════
+var COMPANION_NAMES = [
+  { val:'Fern',  icon:'🌿', desc_es:'Crece en silencio. Paciente, presente, nunca invasiva.',         desc_en:'Grows in silence. Patient, present, never invasive.',        default:true },
+  { val:'Sage',  icon:'🍃', desc_es:'Sabiduría antigua. Honesta, directa, con criterio.',             desc_en:'Ancient wisdom. Honest, direct, discerning.' },
+  { val:'Cove',  icon:'🌊', desc_es:'Un refugio. Contenedora, segura, cálida.',                       desc_en:'A refuge. Nurturing, safe, warm.' },
+  { val:'Reed',  icon:'🌾', desc_es:'Se dobla pero no se rompe. Adaptable, resiliente, tranquila.',   desc_en:'Bends but does not break. Adaptable, resilient, calm.' },
+  { val:'Moss',  icon:'🪨', desc_es:'Siempre viva, cubre suavemente. Constante, sin apuro.',          desc_en:'Always alive, covers gently. Constant, unhurried.' },
+  { val:'Bud',   icon:'🌸', desc_es:'Un brote que empieza. Esperanzadora, curiosa, liviana.',         desc_en:'A budding start. Hopeful, curious, light.' },
+  { val:'Wisp',  icon:'✨', desc_es:'Aparece cuando la necesitás. Sutil, poética.',                   desc_en:'Appears when you need her. Subtle, poetic.' },
+  { val:'Ash',   icon:'🌑', desc_es:'Lo que queda después del fuego. Serena, profunda.',              desc_en:'What remains after fire. Serene, deep.' }
+];
+
+var PROFILE_FIELDS = [
+  { key:'occupation', icon:'💼', label:{ es:'Trabajo / Estudio', en:'Work / Study' } },
+  { key:'schedule',   icon:'🌅', label:{ es:'Rutina diaria',     en:'Daily routine' } },
+  { key:'living_with',icon:'🏠', label:{ es:'Con quién vivís',   en:'Who you live with' } },
+  { key:'romantic',   icon:'💛', label:{ es:'Vida amorosa',      en:'Romantic life' } },
+  { key:'family',     icon:'👨‍👩‍👧', label:{ es:'Familia',          en:'Family' } },
+  { key:'friends',    icon:'🤝', label:{ es:'Amistades',         en:'Friendships' } },
+  { key:'health',     icon:'🌿', label:{ es:'Salud física',      en:'Physical health' } },
+  { key:'sleep',      icon:'🌙', label:{ es:'Sueño',             en:'Sleep' } },
+  { key:'energy',     icon:'⚡', label:{ es:'Energía',           en:'Energy levels' } },
+  { key:'joys',       icon:'✨', label:{ es:'Lo que te da alegría', en:'What brings you joy' } },
+  { key:'fears',      icon:'🌧️', label:{ es:'Lo que te preocupa', en:'What worries you' } },
+  { key:'values',     icon:'💎', label:{ es:'Lo que más importa', en:'What matters most' } }
+];
+
+var MOOD_RESPONSES_ES = {
+  good: ['¿Qué es lo primero que vas a hacer hoy que te dé ganas de verdad?','Si hoy fuera a ser un gran día, ¿cómo empezaría?','¿Hay algo que tenés ganas de hacer hoy que normalmente postergás?','Días así son para atesorar. ¿Qué querés hacer con esta energía?'],
+  ok:   ['Más o menos también es válido. ¿Hay algo puntual que te esté pesando, o es más general?','A veces el "más o menos" es el punto de partida. ¿Qué haría falta para que fuera un poquito mejor?','El "más o menos" tiene su propio ritmo. ¿Cómo estuvo el día hasta ahora?','¿Hubo algo hoy, aunque sea pequeño, que estuvo bien?'],
+  hard: ['Acá estoy. No hay nada que tengas que hacer hoy.','Los días difíciles también son parte del camino. No estás solo/a en esto.','No hace falta que estés bien. Solo que estés acá.','Gracias por abrir la app hoy. Eso ya es algo.']
+};
+var MOOD_RESPONSES_EN = {
+  good: ["What's the first thing you're excited to do today?",'If today was going to be a great day, how would it start?','Is there something you usually put off that you feel like doing today?','Days like this are worth savoring. What do you want to do with this energy?'],
+  ok:   ["So-so is valid too. Is there something specific weighing on you, or is it more general?",'Sometimes so-so is the starting point. What would make it a little better?',"So-so has its own rhythm. How has the day been so far?",'Was there anything today, even something small, that went okay?'],
+  hard: ["I'm here. There's nothing you have to do today.",'Hard days are part of the journey too. You\'re not alone in this.',"You don't have to be okay. You just have to be here.",'Thank you for opening the app today. That already means something.']
+};
+
+var HARD_QUOTES_ES = ['"Los días difíciles son parte del viaje, no el destino."','"No tenés que estar bien. Solo tenés que estar."','"Descansar no es rendirse. Descansar es volver a empezar."'];
+var HARD_QUOTES_EN = ['"Hard days are part of the journey, not the destination."',"\"You don't have to be okay. You just have to be here.\"",'Rest is not giving up. Rest is beginning again.'];
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+var S = {
+  // from server
+  user:      null,
+  profile:   null,
+  messages:  [],
+  memories:  [],
+  sprouts:   [],
+  seeds:     [],
+  seeds_log: [],
+  mood_log:  [],
+  usage:     null,
+
+  // local
+  supabase_session: null,
+  onboarded: false,
+  lang: 'es',
+  aiName: 'Fern',
+  aiGender: 'none',
+  todayMood: '',
+
+  // onboarding temp
+  ob: { lang:'', name:'', companion:'Fern', gender:'none' }
+};
+
+function today() { return new Date().toISOString().slice(0,10); }
+function todayDow() { var d=new Date().getDay(); return d===0?6:d-1; }
+function rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function t(k) {
+  var strings = {
+    es: { mood_good:'Con energía', mood_ok:'Más o menos', mood_hard:'Hoy es difícil', hard_title:'Está bien tener días difíciles.', hard_text:'No tenés que hacer nada hoy. Solo estar acá ya es suficiente.', seeds_desc:'Lo pequeño de hoy. Lo que plantás sin saber exactamente qué va a crecer.', sprouts_desc:'Lo que querés que sea diferente en tu vida. Sin presión, sin plazos.', no_seeds:'Tu compañera puede sugerirte seeds personalizadas.', no_sprouts:'Un Sprout es una dirección, no una meta. Puede ser una sensación, una relación, una versión de vos.', add_seed:'+ Nueva seed', add_sprout:'🌿 Plantar un Sprout', sofia_status:'Acá estoy', sobre_desc:'Lo que tu compañera fue aprendiendo sobre vos. Todo editable.', diary_desc:'Un espacio solo tuyo. Sin filtros.', settings_title:'Ajustes', save_btn:'Guardar', cancel_btn:'Cancelar', ver_full:'Completo', ver_mini:'Mínimo', ver_exist:'Solo existir', connect_seed:'🌱 Conectar seed', talk_to:'Hablar con', reflects:'reflexiona', suggests:'sugiere seeds', seeds_today:'Seeds conectadas hoy', continue_chat:'Tocá para continuar', no_notes:'Tu compañera aprende sobre vos a medida que hablás.', tap_add:'Tocá para agregar...', write_reply:'Escribile a tu compañera...', journal_empty:'Sin entradas aún.', daily_life:'📅 Vida cotidiana', relationships:'❤️ Vínculos', wellbeing:'🌿 Bienestar', inner:'✨ Mundo interior' },
+    en: { mood_good:'With energy', mood_ok:'So-so', mood_hard:'Today is hard', hard_title:'Hard days are okay.', hard_text:"You don't have to do anything today. Just being here is enough.", seeds_desc:"The small things of today. What you plant without knowing exactly what will grow.", sprouts_desc:"What you want to be different in your life. No pressure, no deadlines.", no_seeds:"Your companion can suggest personalized seeds for you.", no_sprouts:"A Sprout is a direction, not a goal. It can be a feeling, a relationship, a version of yourself.", add_seed:'+ New seed', add_sprout:'🌿 Plant a Sprout', sofia_status:'Here for you', sobre_desc:"What your companion has learned about you. All editable.", diary_desc:"A space that's just yours. No filters.", settings_title:'Settings', save_btn:'Save', cancel_btn:'Cancel', ver_full:'Full', ver_mini:'Mini', ver_exist:'Just exist', connect_seed:'🌱 Connect seed', talk_to:'Talk to', reflects:'reflects', suggests:'suggests seeds', seeds_today:'Seeds connected today', continue_chat:'Tap to continue', no_notes:"Your companion learns about you as you talk.", tap_add:'Tap to add...', write_reply:'Write to your companion...', journal_empty:'No entries yet.', daily_life:'📅 Daily life', relationships:'❤️ Relationships', wellbeing:'🌿 Wellbeing', inner:'✨ Inner world' }
+  };
+  var l = S.lang || 'es';
+  return (strings[l] && strings[l][k]) ? strings[l][k] : (strings.es[k] || k);
+}
+
+// ════════════════════════════════════════
+// SUPABASE HELPERS (usando REST directo)
+// ════════════════════════════════════════
+async function sbGet(table, params) {
+  var url = CFG.supabase_url + '/rest/v1/' + table + (params ? '?' + params : '');
+  var res = await fetch(url, {
+    headers: { 'apikey': CFG.supabase_key, 'Authorization': 'Bearer ' + (S.supabase_session || CFG.supabase_key) }
+  });
+  var text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+async function callSync(action, data) {
+  if (!S.user) return { ok: false };
+  try {
+    var res = await fetch('/api/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: action, user_id: S.user.id, data: data || {} })
+    });
+    return await res.json();
+  } catch(e) {
+    console.error('Sync error:', e);
+    return { ok: false };
+  }
+}
+
+async function callFern(messages, system) {
+  try {
+    var res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: messages,
+        system: system || '',
+        user_id: S.user ? S.user.id : null,
+        save_message: !!S.user
+      })
+    });
+    if (!res.ok) return S.lang === 'en' ? "I'm having trouble connecting. Try again in a moment 🌿" : 'Estoy teniendo problemas para conectarme. Intentá de nuevo en un momento 🌿';
+    var data = await res.json();
+    if (data.error) return data.error;
+    return data.content && data.content[0] ? data.content[0].text : '';
+  } catch(e) {
+    return S.lang === 'en' ? "Connection error. Check your internet 🌿" : 'Error de conexión. Revisá tu internet 🌿';
+  }
+}
+
+// ════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════
+async function boot() {
+  // Load config from server
+  try {
+    var res = await fetch('/api/config');
+    CFG = await res.json();
+  } catch(e) {
+    console.error('Config load failed:', e);
+  }
+
+  // Check URL for auth callback
+  var hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    await handleAuthCallback(hash);
+    return;
+  }
+
+  // Check local state
+  var saved = localStorage.getItem('sp4_state');
+  if (saved) {
+    try {
+      var parsed = JSON.parse(saved);
+      S.lang     = parsed.lang     || 'es';
+      S.aiName   = parsed.aiName   || 'Fern';
+      S.aiGender = parsed.aiGender || 'none';
+      S.onboarded= parsed.onboarded|| false;
+      S.supabase_session = parsed.session || null;
+    } catch(e) {}
+  }
+
+  if (!S.onboarded) {
+    showOnboarding();
+    return;
+  }
+
+  // Try to load user data
+  if (S.supabase_session) {
+    await loadUserData();
+  }
+
+  hideLoading();
+  showApp();
+}
+
+async function handleAuthCallback(hash) {
+  var params = new URLSearchParams(hash.replace('#', ''));
+  var accessToken = params.get('access_token');
+  if (accessToken) {
+    S.supabase_session = accessToken;
+    // Get user info from Supabase
+    try {
+      var res = await fetch(CFG.supabase_url + '/auth/v1/user', {
+        headers: { 'Authorization': 'Bearer ' + accessToken, 'apikey': CFG.supabase_key }
+      });
+      var userData = await res.json();
+      if (userData.id) {
+        // Create user record if needed
+        await fetch('/api/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create_user', user_id: userData.id, data: { language: S.lang } })
+        });
+        S.user = { id: userData.id, email: userData.email, ai_name: S.aiName, ai_gender: S.aiGender, language: S.lang };
+        await loadUserData();
+      }
+    } catch(e) { console.error('Auth callback error:', e); }
+    saveLocal();
+  }
+  window.history.replaceState({}, document.title, window.location.pathname);
+  hideLoading();
+  showApp();
+}
+
+async function loadUserData() {
+  if (!S.user) return;
+  try {
+    var res = await fetch('/api/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'load', user_id: S.user.id })
+    });
+    var data = await res.json();
+    if (data.user)     { S.user    = data.user;    S.aiName = data.user.ai_name || 'Fern'; S.aiGender = data.user.ai_gender || 'none'; S.lang = data.user.language || 'es'; }
+    if (data.profile)  S.profile  = data.profile;
+    if (data.messages) S.messages = data.messages;
+    if (data.memories) S.memories = data.memories;
+    if (data.sprouts)  S.sprouts  = data.sprouts;
+    if (data.seeds)    S.seeds    = data.seeds;
+    if (data.seeds_log)S.seeds_log= data.seeds_log;
+    if (data.mood_log) S.mood_log = data.mood_log;
+    if (data.usage)    S.usage    = data.usage;
+    // Today's mood
+    var todayMood = (S.mood_log || []).find(function(m) { return m.date === today(); });
+    S.todayMood = todayMood ? todayMood.mood : '';
+  } catch(e) { console.error('Load error:', e); }
+}
+
+function saveLocal() {
+  localStorage.setItem('sp4_state', JSON.stringify({
+    lang: S.lang, aiName: S.aiName, aiGender: S.aiGender,
+    onboarded: S.onboarded, session: S.supabase_session
+  }));
+}
+
+function hideLoading() {
+  var l = document.getElementById('loading');
+  if (l) l.classList.add('hidden');
+}
+
+function showApp() {
+  var app = document.getElementById('app');
+  if (app) { app.style.display = 'flex'; buildSidebar(); updateNavLabels(); nav('inicio'); }
+}
+
+// ════════════════════════════════════════
+// ONBOARDING
+// ════════════════════════════════════════
+var obStep = 0;
+var OB_STEPS = ['welcome','lang','name','companion','done'];
+
+function showOnboarding() {
+  hideLoading();
+  var ob = document.getElementById('onboarding');
+  if (ob) ob.style.display = 'flex';
+  obStep = 0;
+  renderObStep();
+}
+
+function renderObStep() {
+  var body = document.getElementById('ob-body');
+  if (!body) return;
+  var step = OB_STEPS[obStep];
+  var lang = S.ob.lang || 'es';
+  var isEN = lang === 'en';
+
+  var dots = OB_STEPS.slice(1, OB_STEPS.length-1).map(function(_, i) {
+    return '<div class="ob-dot' + (i < obStep ? ' done' : '') + '"></div>';
+  }).join('');
+  var progress = obStep > 0 && obStep < OB_STEPS.length-1 ? '<div class="ob-progress">' + dots + '</div>' : '';
+
+  if (step === 'welcome') {
+    body.innerHTML = progress +
+      '<div class="ob-q" style="text-align:center;margin-bottom:12px">Tu espacio para el cambio</div>' +
+      '<div class="ob-desc" style="text-align:center">En Sprout vas a tener un lugar para plantar lo que querés que crezca en tu vida. Y una compañera que te acompaña, que recuerda lo que le contás, que no te juzga.<br><br>No hace falta tener todo claro. Solo estar acá ya es suficiente.</div>' +
+      '<button class="btn primary full" onclick="obNext()">Empezar →</button>';
+  }
+  else if (step === 'lang') {
+    body.innerHTML = progress +
+      '<div class="ob-q">Choose your language / Elegí tu idioma</div>' +
+      '<div class="ob-opts">' +
+        '<button class="ob-opt' + (S.ob.lang==='es'?' sel':'') + '" onclick="obPickLang(\'es\',this)"><span class="ob-opt-icon">🇦🇷</span><span>Español</span></button>' +
+        '<button class="ob-opt' + (S.ob.lang==='en'?' sel':'') + '" onclick="obPickLang(\'en\',this)"><span class="ob-opt-icon">🇺🇸</span><span>English</span></button>' +
+      '</div>' +
+      '<button class="btn primary full" onclick="obNext()">Continuar / Continue →</button>';
+  }
+  else if (step === 'name') {
+    body.innerHTML = progress +
+      '<div class="ob-q">' + (isEN ? 'What should I call you?' : '¿Cómo querés que te llame?') + '</div>' +
+      '<input class="ob-name-input" id="ob-name" type="text" placeholder="' + (isEN ? 'Your name...' : 'Tu nombre...') + '" value="' + (S.ob.name||'') + '" onkeydown="if(event.key===\'Enter\')obNext()">' +
+      '<button class="btn primary full" onclick="obNext()">' + (isEN ? 'Next →' : 'Siguiente →') + '</button>';
+    setTimeout(function() { var e=document.getElementById('ob-name'); if(e) e.focus(); }, 100);
+  }
+  else if (step === 'companion') {
+    var nameOpts = COMPANION_NAMES.map(function(c) {
+      var desc = isEN ? c.desc_en : c.desc_es;
+      var label = c.default ? c.val + (isEN ? ' (Default)' : ' (Default)') : c.val;
+      return '<button class="ob-opt' + (S.ob.companion===c.val?' sel':'') + '" onclick="obPickCompanion(\'' + c.val + '\',this)">' +
+        '<span class="ob-opt-icon">' + c.icon + '</span>' +
+        '<div class="ob-opt-info"><div class="ob-opt-name">' + label + '</div><div class="ob-opt-desc">' + desc + '</div></div>' +
+      '</button>';
+    }).join('');
+
+    var genderQ = isEN ? 'How should your companion refer to herself?' : '¿Cómo querés que tu compañera se refiera a sí misma?';
+    var genders = isEN
+      ? [{val:'she',lbl:'She / Her'},{val:'he',lbl:'He / Him'},{val:'none',lbl:'No preference'}]
+      : [{val:'ella',lbl:'Ella'},{val:'el',lbl:'Él'},{val:'none',lbl:'Sin preferencia'}];
+    var genderBtns = genders.map(function(g) {
+      return '<button class="ob-gender-btn' + (S.ob.gender===g.val?' sel':'') + '" onclick="obPickGender(\'' + g.val + '\',this)">' + g.lbl + '</button>';
+    }).join('');
+
+    body.innerHTML = progress +
+      '<div class="ob-q">' + (isEN ? 'Choose your companion' : 'Elegí tu compañera') + '</div>' +
+      '<div class="ob-opts" style="max-height:280px;overflow-y:auto">' + nameOpts + '</div>' +
+      '<div style="margin:14px 0 6px;font-size:12px;color:var(--t2);font-weight:500">' + genderQ + '</div>' +
+      '<div class="ob-gender-row">' + genderBtns + '</div>' +
+      '<button class="btn primary full" onclick="obNext()">' + (isEN ? 'Meet ' + (S.ob.companion||'Fern') + ' →' : 'Conocer a ' + (S.ob.companion||'Fern') + ' →') + '</button>';
+  }
+
+  body.classList.remove('fade-in');
+  void body.offsetWidth;
+  body.classList.add('fade-in');
+}
+
+function obPickLang(lang, btn) {
+  S.ob.lang = lang;
+  document.querySelectorAll('#ob-body .ob-opt').forEach(function(b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+}
+function obPickCompanion(name, btn) {
+  S.ob.companion = name;
+  document.querySelectorAll('#ob-body .ob-opt').forEach(function(b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+  // Update button text
+  var nextBtn = document.querySelector('#ob-body .btn.primary');
+  var isEN = (S.ob.lang || 'es') === 'en';
+  if (nextBtn) nextBtn.textContent = (isEN ? 'Meet ' : 'Conocer a ') + name + ' →';
+}
+function obPickGender(gender, btn) {
+  S.ob.gender = gender;
+  document.querySelectorAll('.ob-gender-btn').forEach(function(b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+}
+
+function obNext() {
+  var step = OB_STEPS[obStep];
+  if (step === 'welcome') { obStep++; renderObStep(); return; }
+  if (step === 'lang') {
+    if (!S.ob.lang) S.ob.lang = 'es';
+    S.lang = S.ob.lang;
+    obStep++; renderObStep(); return;
+  }
+  if (step === 'name') {
+    var e = document.getElementById('ob-name');
+    S.ob.name = (e && e.value.trim()) ? e.value.trim() : (S.ob.lang==='en' ? 'friend' : 'amigue');
+    obStep++; renderObStep(); return;
+  }
+  if (step === 'companion') {
+    if (!S.ob.companion) S.ob.companion = 'Fern';
+    if (!S.ob.gender)    S.ob.gender    = 'none';
+    S.aiName   = S.ob.companion;
+    S.aiGender = S.ob.gender;
+    S.onboarded = true;
+    saveLocal();
+    obFinish();
+  }
+}
+
+function obFinish() {
+  // Build Fern's first message
+  var isEN = S.lang === 'en';
+  var name = S.ob.name;
+  var aiN  = S.aiName;
+  var greeting = isEN
+    ? 'Hi ' + name + '! I\'m ' + aiN + ' 🌿\n\nReally glad you\'re here.\n\nWant me to show you how Sprout works? It takes two minutes — and then we can get to what actually matters.'
+    : 'Hola ' + name + '! Soy ' + aiN + ' 🌿\n\nQué bueno que estés acá.\n\n¿Querés que te muestre cómo funciona Sprout? Son dos minutos — y después vamos a lo que realmente importa.';
+
+  S.messages = [{ role: 'ai', content: greeting, date: today() }];
+
+  // Set profile name
+  if (!S.profile) S.profile = {};
+  S.profile.name = S.ob.name;
+
+  document.getElementById('onboarding').style.display = 'none';
+
+  // Show login screen
+  showLoginScreen(false);
+}
+
+// ════════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════════
+function showLoginScreen(required) {
+  var ls = document.getElementById('login-screen');
+  var isEN = S.lang === 'en';
+  document.getElementById('login-title').textContent = isEN ? 'Save your progress' : 'Guardá tu progreso';
+  document.getElementById('login-sub').textContent = isEN
+    ? 'Sign in with Google so your companion remembers you between sessions. Your data is yours alone.'
+    : 'Entrá con Google para que tu compañera te recuerde entre sesiones. Tus datos son solo tuyos.';
+  document.getElementById('login-btn-text').textContent = isEN ? 'Sign in with Google' : 'Entrar con Google';
+  document.getElementById('login-privacy').textContent = isEN
+    ? 'Your data is yours. Sprout never sells or shares it. Your private journal is never read by us or your companion.'
+    : 'Tus datos son tuyos. Sprout no los vende ni los comparte. Tu diario privado nunca es leído por nosotros ni por tu compañera.';
+
+  var skip = document.getElementById('login-skip');
+  if (required) {
+    skip.textContent = isEN ? 'Continue without saving' : 'Continuar sin guardar';
+  } else {
+    skip.textContent = isEN ? 'Skip for now' : 'Ahora no, gracias';
+  }
+  ls.style.display = 'flex';
+}
+
+function loginWithGoogle() {
+  if (!CFG.supabase_url || !CFG.supabase_key) { console.error('Supabase not configured'); return; }
+  var redirectTo = window.location.origin + '/auth/callback';
+  var url = CFG.supabase_url + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectTo);
+  window.location.href = url;
+}
+
+function skipLogin() {
+  document.getElementById('login-screen').style.display = 'none';
+  hideLoading();
+  showApp();
+}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+var currentPage = 'inicio';
+var PAGE_RENDERERS = {
+  inicio: renderInicio, seeds: renderSeeds, sprouts: renderSprouts,
+  sofia: renderSofia, sobre: renderSobre, diario: renderDiario,
+  aprendizaje: renderAprendizaje, ajustes: renderAjustes
+};
+
+function nav(pageId) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.bn').forEach(function(b) { b.classList.remove('active'); });
+  var pg = el('page-' + pageId);
+  if (pg) { pg.classList.add('active'); pg.classList.remove('fade-in'); void pg.offsetWidth; pg.classList.add('fade-in'); }
+  var bn = el('bn-' + pageId);
+  if (bn) bn.classList.add('active');
+  el('pages').scrollTop = 0;
+  currentPage = pageId;
+  if (PAGE_RENDERERS[pageId]) PAGE_RENDERERS[pageId]();
+}
+
+function updateNavLabels() {
+  var aiN = S.aiName || 'Fern';
+  setText('bn-sofia-lbl', aiN);
+  setText('bn-sobre-lbl', t('nav_sobre') || (S.lang==='en' ? 'About you' : 'Sobre vos'));
+  setText('bn-inicio-lbl', S.lang==='en' ? 'Home' : 'Inicio');
+}
+
+function buildSidebar() {
+  var aiN = S.aiName || 'Fern';
+  var items = [
+    { icon:'🏠', label: S.lang==='en'?'Home':'Inicio',              page:'inicio' },
+    { icon:'🌱', label: 'Seeds',                                     page:'seeds' },
+    { icon:'🌿', label: 'Sprouts',                                   page:'sprouts' },
+    { icon:'💬', label: aiN,                                         page:'sofia' },
+    { icon:'👤', label: S.lang==='en'?'About you':'Sobre vos',      page:'sobre' },
+    { icon:'📓', label: S.lang==='en'?'Journal':'Diario',           page:'diario' },
+    { icon:'📖', label: S.lang==='en'?'Learn':'Centro de aprendizaje', page:'aprendizaje' },
+    { icon:'⚙️', label: S.lang==='en'?'Settings':'Ajustes',          page:'ajustes' }
+  ];
+  var nav = el('sidebar-nav');
+  nav.innerHTML = '';
+  items.forEach(function(item) {
+    var btn = document.createElement('button');
+    btn.className = 'sidebar-item';
+    btn.innerHTML = '<span style="font-size:18px">' + item.icon + '</span><span>' + item.label + '</span>';
+    btn.onclick = function() { closeSidebar(); nav_(item.page); };
+    nav.appendChild(btn);
+  });
+
+  // User info
+  var userDiv = el('sidebar-user');
+  if (S.user) {
+    var name = (S.profile && S.profile.name) ? S.profile.name : (S.user.email || 'Usuario');
+    userDiv.innerHTML =
+      '<div class="sidebar-user-avatar">👤</div>' +
+      '<div class="sidebar-user-name">' + name + '</div>' +
+      '<button class="sidebar-logout" onclick="logout()">' + (S.lang==='en'?'Sign out':'Salir') + '</button>';
+  } else {
+    userDiv.innerHTML =
+      '<button class="btn soft sm full" onclick="showLoginScreen(false)">' +
+        (S.lang==='en' ? '🔑 Sign in' : '🔑 Iniciar sesión') +
+      '</button>';
+  }
+}
+
+function nav_(page) { nav(page); }
+function openSidebar() { el('sidebar').classList.add('open'); el('sidebar-overlay').classList.add('open'); }
+function closeSidebar() { el('sidebar').classList.remove('open'); el('sidebar-overlay').classList.remove('open'); }
+
+function logout() {
+  S.supabase_session = null; S.user = null; S.profile = null;
+  S.messages = []; S.seeds = []; S.sprouts = []; S.mood_log = [];
+  saveLocal();
+  location.reload();
+}
+
+// ════════════════════════════════════════
+// TRACK USAGE
+// ════════════════════════════════════════
+function track(type, pts) {
+  if (!S.usage) S.usage = { chat_score:0, structure_score:0, support_score:0, days_active:0 };
+  S.usage[type + '_score'] = (S.usage[type + '_score'] || 0) + (pts || 1);
+  callSync('update_usage', S.usage).catch(function(){});
+}
+
+function getUserMode() {
+  if (!S.usage) return 'new';
+  var chat = (S.usage.chat_score||0) + (S.usage.support_score||0);
+  var struct = (S.usage.structure_score||0);
+  var total = chat + struct;
+  if (total < 3) return 'new';
+  if (chat > struct * 2) return 'companion';
+  if (struct > chat * 2) return 'structure';
+  return 'mixed';
+}
+
+// ════════════════════════════════════════
+// PAGE: INICIO
+// ════════════════════════════════════════
+function renderInicio() {
+  var pg = el('page-inicio');
+  pg.innerHTML = '';
+  var mood = S.todayMood;
+  var mode = getUserMode();
+  var aiN  = S.aiName || 'Fern';
+  var lang = S.lang || 'es';
+  var h = new Date().getHours();
+  var greet = lang==='en' ? (h<12?'Good morning':h<19?'Hello':'Good evening') : (h<12?'Buenos días':h<19?'Hola':'Buenas noches');
+  var profileName = (S.profile && S.profile.name) ? S.profile.name : (S.ob && S.ob.name ? S.ob.name : '');
+  var name = profileName ? ', ' + profileName : '';
+
+  if (mood === 'hard') { pg.appendChild(makeHardDay()); return; }
+
+  pg.appendChild(makeCheckin(greet + name, mood));
+  if (mood && mood !== 'hard') setTimeout(function() { injectMoodResponse(pg, mood); }, 50);
+  if (!mood) return;
+
+  if (mode === 'companion') {
+    pg.appendChild(makeCompanionCard(aiN, lang));
+    var ts = todaySeeds();
+    if (ts.length) {
+      pg.appendChild(makeSectionLabel(lang==='en' ? '🌱 Your seeds for today' : '🌱 Tus seeds de hoy'));
+      ts.slice(0,2).forEach(function(s) { pg.appendChild(makeSeedCard(s)); });
+    }
+  } else {
+    var ts2 = todaySeeds();
+    var lim = mood==='ok' ? 2 : ts2.length;
+    if (ts2.length) {
+      ts2.slice(0, lim).forEach(function(s) { pg.appendChild(makeSeedCard(s)); });
+    } else {
+      pg.appendChild(makeEmptySeeds(aiN, lang));
+    }
+    if (mode === 'structure' && S.sprouts.length) {
+      pg.appendChild(makeSectionLabel(lang==='en' ? '🌿 Your sprouts' : '🌿 Tus sprouts'));
+      S.sprouts.slice(0,2).forEach(function(sp) {
+        var mini = document.createElement('div');
+        mini.style.cssText = 'background:var(--b0);border:1.5px solid var(--bd);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer';
+        mini.onclick = function() { nav('sprouts'); };
+        mini.innerHTML = '<span style="font-size:22px">' + (sp.icon||'🌿') + '</span><span style="flex:1;font-size:13px;font-weight:500">' + sp.name + '</span><span style="color:var(--g2)">→</span>';
+        pg.appendChild(mini);
+      });
+    }
+  }
+}
+
+function makeCheckin(greeting, mood) {
+  var lang = S.lang || 'es';
+  var sub = mood ? (lang==='en'?'Good. Your seeds are waiting 🌿':'Bien. Tus seeds te esperan 🌿') : (lang==='en'?'How are you arriving today?':'¿Cómo llegás hoy?');
+  var div = document.createElement('div');
+  div.className = 'checkin';
+  div.innerHTML =
+    '<div class="checkin-hi">' + greeting + '</div>' +
+    '<div class="checkin-sub">' + sub + '</div>' +
+    '<div class="mood-grid">' +
+      '<button class="mood-btn' + (mood==='good'?' active':'') + '" onclick="setMood(\'good\')">' +
+        '<span class="mood-emoji">🌤️</span><span class="mood-label">' + t('mood_good') + '</span></button>' +
+      '<button class="mood-btn' + (mood==='ok'?' active':'') + '" onclick="setMood(\'ok\')">' +
+        '<span class="mood-emoji">🌥️</span><span class="mood-label">' + t('mood_ok') + '</span></button>' +
+      '<button class="mood-btn" onclick="setMood(\'hard\')">' +
+        '<span class="mood-emoji">🌧️</span><span class="mood-label">' + t('mood_hard') + '</span></button>' +
+    '</div>';
+  return div;
+}
+
+function makeHardDay() {
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  var q = rand(lang==='en' ? HARD_QUOTES_EN : HARD_QUOTES_ES);
+  var hardDays = (S.mood_log||[]).slice(-7).filter(function(m){return m.mood==='hard';}).length;
+  var div = document.createElement('div');
+  div.className = 'hardday';
+  div.innerHTML =
+    '<span class="hardday-emoji">🌧️</span>' +
+    '<div class="hardday-title">' + t('hard_title') + '</div>' +
+    '<div class="hardday-text">' + (hardDays>=3 ? (lang==='en'?"You've had a rough few days. I'm here, no matter what.":'Estuviste teniendo días difíciles. Acá estoy, pase lo que pase.') : t('hard_text')) + '</div>' +
+    '<div class="hardday-quote">' + q + '</div>' +
+    '<button class="btn soft full" onclick="nav(\'sofia\')">💬 ' + (lang==='en'?'Talk to ':'Hablar con ') + aiN + '</button>' +
+    '<button class="btn ghost full" style="margin-top:7px" onclick="setMood(\'ok\')">' + (lang==='en'?"Actually I'm okay":'En realidad estoy más o menos') + '</button>';
+  return div;
+}
+
+function injectMoodResponse(pg, mood) {
+  var existing = document.getElementById('mood-response');
+  if (existing) existing.remove();
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  var hardDays = (S.mood_log||[]).slice(-7).filter(function(m){return m.mood==='hard';}).length;
+  var pool = lang==='en' ? MOOD_RESPONSES_EN[mood] : MOOD_RESPONSES_ES[mood];
+  var msg = (hardDays>=3 && mood==='hard')
+    ? (lang==='en'?"You've had a rough few days. I'm here, no matter what. Take all the time you need.":'Estuviste teniendo días difíciles. Acá estoy, pase lo que pase. Tomate todo el tiempo que necesitás.')
+    : rand(pool);
+  var isQ = msg.indexOf('?') !== -1;
+  var div = document.createElement('div');
+  div.id = 'mood-response';
+  div.className = 'sofia-response';
+  var btnHtml = isQ
+    ? '<button class="sofia-response-btn" onclick="replyToFern(\'' + msg.replace(/'/g,"\\'") + '\')">' +
+        '💬 ' + (lang==='en'?'Reply to ':'Responderle a ') + aiN + ' →</button>'
+    : '<button class="sofia-response-btn ghost" onclick="nav(\'sofia\')">' +
+        '💬 ' + (lang==='en'?'Talk to ':'Hablar con ') + aiN + '</button>';
+  div.innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+      '<div class="sofia-av">🌿</div>' +
+      '<span class="sofia-response-name">' + aiN + '</span>' +
+    '</div>' +
+    '<div class="sofia-response-msg">' + msg + '</div>' +
+    btnHtml;
+  var checkin = pg.querySelector('.checkin');
+  if (checkin && checkin.nextSibling) pg.insertBefore(div, checkin.nextSibling);
+  else pg.appendChild(div);
+}
+
+function makeCompanionCard(aiN, lang) {
+  var div = document.createElement('div');
+  div.className = 'companion-card';
+  div.onclick = function() { nav('sofia'); };
+  div.innerHTML =
+    '<div class="companion-av">🌿</div>' +
+    '<div><div class="companion-name">' + aiN + '</div><div class="companion-sub">' + t('continue_chat') + '</div></div>' +
+    '<span style="color:var(--g2);font-size:18px">→</span>';
+  return div;
+}
+
+function makeEmptySeeds(aiN, lang) {
+  var div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = '<div style="padding:20px"><div class="empty">' +
+    '<span class="empty-icon">🌱</span>' +
+    '<div class="empty-title">' + (lang==='en'?'No seeds today':'Sin seeds hoy') + '</div>' +
+    '<div class="empty-text">' + t('no_seeds') + '</div></div>' +
+    '<button class="btn soft full" style="margin-top:10px" onclick="showAddSeed()">+ ' + t('add_seed') + '</button>' +
+    '</div>';
+  return div;
+}
+
+function makeSectionLabel(text) {
+  var div = document.createElement('div');
+  div.style.cssText = 'font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:4px 2px';
+  div.textContent = text;
+  return div;
+}
+
+function setMood(mood) {
+  S.todayMood = mood;
+  if (mood === 'hard') track('support', 2);
+  // Save to server
+  callSync('save_mood', { mood: mood }).catch(function(){});
+  // Update local mood_log
+  var existing = (S.mood_log||[]).findIndex(function(m){return m.date===today();});
+  if (existing >= 0) S.mood_log[existing].mood = mood;
+  else { if(!S.mood_log) S.mood_log=[]; S.mood_log.push({date:today(), mood:mood}); }
+  renderInicio();
+  if (mood !== 'hard' && S.seeds.length === 0) setTimeout(askFernForSeeds, 1500);
+}
+
+function replyToFern(question) {
+  nav('sofia');
+  setTimeout(function() {
+    var inp = el('chat-input');
+    if (inp) { inp.value = '> "' + question + '"\n'; inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }, 300);
+}
+
+function todaySeeds() {
+  return (S.seeds||[]).filter(function(s) { return !s.days || JSON.parse(typeof s.days==='string'?s.days:JSON.stringify(s.days)).indexOf(todayDow()) !== -1; });
+}
+
+// ════════════════════════════════════════
+// SEEDS
+// ════════════════════════════════════════
+function makeSeedCard(seed) {
+  var doneEntry = (S.seeds_log||[]).find(function(l){return l.seed_id===seed.id && l.date===today();});
+  var isDone    = doneEntry ? doneEntry.done : false;
+  var color     = seed.color || '#4a7c59';
+
+  // Streak — últimos 7 días
+  var streakHtml = '<div class="seed-streak">';
+  for (var d = 6; d >= 0; d--) {
+    var dd = new Date(); dd.setDate(dd.getDate()-d);
+    var ds = dd.toISOString().slice(0,10);
+    var isToday = d === 0;
+    var wasDone = (S.seeds_log||[]).find(function(l){return l.seed_id===seed.id && l.date===ds && l.done;});
+    streakHtml += '<div class="seed-streak-dot' + (wasDone?' done':'') + (isToday?' today':'') + '" style="' + (wasDone?'background:'+color:'') + '" title="' + ds + '"></div>';
+  }
+  streakHtml += '</div>';
+
+  // Sprout tag
+  var sprout = seed.sprout_id ? (S.sprouts||[]).find(function(s){return s.id===seed.sprout_id;}) : null;
+  var sproutTag = sprout
+    ? '<div class="seed-sprout-tag">' + (sprout.icon||'🌿') + ' ' + sprout.name + '</div>'
+    : '';
+
+  // Fern tip — mostrar si existe y no está hecha
+  var tip = seed.fern_tip || '';
+  var showTip = tip && !isDone;
+  var tipHtml = showTip
+    ? '<div class="seed-fern-tip"><span class="seed-fern-tip-icon">🌿</span><span class="seed-fern-tip-text">' + tip + '</span></div>'
+    : '';
+
+  // Progress bar — % completado esta semana
+  var doneCount = 0;
+  for (var x = 6; x >= 0; x--) {
+    var ddd = new Date(); ddd.setDate(ddd.getDate()-x);
+    var ds2 = ddd.toISOString().slice(0,10);
+    if ((S.seeds_log||[]).find(function(l){return l.seed_id===seed.id && l.date===ds2 && l.done;})) doneCount++;
+  }
+  var days = typeof seed.days === 'string' ? JSON.parse(seed.days) : (seed.days || [0,1,2,3,4,5,6]);
+  var pct = days.length > 0 ? Math.round(doneCount / Math.min(days.length, 7) * 100) : 0;
+
+  var div = document.createElement('div');
+  div.className = 'seed-card' + (isDone ? ' done' : '');
+  div.id = 'seed-' + seed.id;
+  div.innerHTML =
+    '<div class="seed-card-top">' +
+      '<div class="seed-icon" style="background:' + color + '18;color:' + color + '">' + (seed.icon||'🌱') + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="seed-name" style="' + (isDone?'text-decoration:line-through;opacity:.5':'') + '">' + seed.name + '</div>' +
+        sproutTag +
+      '</div>' +
+      '<button class="seed-check' + (isDone?' done':'') + '" id="chk-' + seed.id + '" onclick="toggleSeed(\'' + seed.id + '\')" style="' + (isDone?'border-color:'+color+';background:'+color:'border-color:'+color+'66') + '">' +
+        (isDone ? '✓' : '') +
+      '</button>' +
+    '</div>' +
+    tipHtml +
+    streakHtml +
+    '<div class="seed-progress" style="margin-bottom:' + (pct>0?'13':'0') + 'px">' +
+      '<div class="seed-progress-bar" style="width:' + pct + '%;background:' + color + '"></div>' +
+    '</div>';
+
+  return div;
+}
+
+function toggleSeed(seedId) {
+  var entry = (S.seeds_log||[]).find(function(l){return l.seed_id===seedId && l.date===today();});
+  var wasDone = entry ? entry.done : false;
+  var newDone = !wasDone;
+  if (!S.seeds_log) S.seeds_log = [];
+  if (entry) entry.done = newDone;
+  else S.seeds_log.push({ seed_id: seedId, date: today(), done: newDone });
+  if (newDone) track('structure');
+
+  // Bloom animation
+  var chk = document.getElementById('chk-' + seedId);
+  if (chk && newDone) {
+    chk.classList.add('bloom');
+    setTimeout(function(){chk.classList.remove('bloom');}, 400);
+  }
+
+  callSync('toggle_seed', { seed_id: seedId, done: newDone }).catch(function(){});
+
+  // Update Sprout progress if connected
+  var seed = (S.seeds||[]).find(function(s){return s.id===seedId;});
+  if (seed && seed.sprout_id && newDone) checkSproutProgress(seed.sprout_id);
+
+  if (currentPage === 'inicio') renderInicio();
+  if (currentPage === 'seeds') renderSeeds();
+}
+
+function selectVersion(seedId, vIdx, event) {
+  if (event) event.stopPropagation();
+  var entry = (S.seeds_log||[]).find(function(l){return l.seed_id===seedId && l.date===today();});
+  if (entry) entry.version_idx = vIdx;
+  else { if(!S.seeds_log)S.seeds_log=[]; S.seeds_log.push({seed_id:seedId, date:today(), done:false, version_idx:vIdx}); }
+  callSync('toggle_seed', { seed_id: seedId, done: entry ? entry.done : false, version_idx: vIdx }).catch(function(){});
+  if (currentPage === 'inicio') renderInicio();
+  if (currentPage === 'seeds') renderSeeds();
+}
+
+function renderSeeds() {
+  var pg = el('page-seeds');
+  pg.innerHTML = '';
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  pg.appendChild(makePageHd('🌱', 'Seeds', t('seeds_desc')));
+
+  if (!S.seeds || !S.seeds.length) {
+    var empty = document.createElement('div');
+    empty.className = 'card';
+    empty.innerHTML =
+      '<div style="padding:20px">' +
+        '<div class="empty">' +
+          '<span class="empty-icon">🌱</span>' +
+          '<div class="empty-title">' + (lang==='en'?'Your garden is empty':'Tu jardín está vacío') + '</div>' +
+          '<div class="empty-text">' + t('no_seeds') + '</div>' +
+        '</div>' +
+        '<button class="btn primary full" style="margin-top:14px" onclick="fernHelpWithSeed()">🌿 ' +
+          (lang==='en'?aiN+' helps me plant':''+aiN+' me ayuda a plantar') +
+        '</button>' +
+        '<button class="btn ghost full" style="margin-top:7px" onclick="showAddSeed()">+ ' +
+          (lang==='en'?'Create manually':'Crear manualmente') +
+        '</button>' +
+      '</div>';
+    pg.appendChild(empty);
+    return;
+  }
+
+  S.seeds.forEach(function(s) { pg.appendChild(makeSeedCard(s)); });
+
+  var actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;gap:8px';
+  actions.innerHTML =
+    '<button class="btn primary" style="flex:1" onclick="fernHelpWithSeed()">🌿 ' +
+      (lang==='en'?aiN+' helps':''+aiN+' ayuda') +
+    '</button>' +
+    '<button class="btn soft" style="flex:1" onclick="showAddSeed()">+ ' +
+      (lang==='en'?'Manual':'Manual') +
+    '</button>';
+  pg.appendChild(actions);
+}
+
+var newSeed = { color:'#4a7c59', icon:'🌱', days:[0,1,2,3,4,5,6] };
+
+function showAddSeed() {
+  newSeed = { color:'#4a7c59', icon:'🌱', days:[0,1,2,3,4,5,6], fern_tip:'' };
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  var COLORS = ['#4a7c59','#7c5cbf','#c07850','#4a7ca0','#c05c7c','#7c9c4a'];
+  var ICONS  = ['🌱','🚶','💧','📖','🧘','🌅','🎨','🎵','💪','🍎','😴','🤝','✍️','🌬️'];
+  var days   = lang==='en' ? ['Mo','Tu','We','Th','Fr','Sa','Su'] : ['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
+
+  var colorHtml = COLORS.map(function(c,i) {
+    return '<div class="color-dot' + (i===0?' sel':'') + '" style="background:' + c + '" data-c="' + c + '" onclick="pickSeedColor(this)"></div>';
+  }).join('');
+  var iconHtml = ICONS.map(function(ic,i) {
+    return '<button class="icon-opt' + (i===0?' sel':'') + '" data-i="' + ic + '" onclick="pickSeedIcon(this)">' + ic + '</button>';
+  }).join('');
+  var dayHtml = days.map(function(d,i) {
+    return '<button class="day-pill sel" data-d="' + i + '" onclick="toggleSeedDay(this)">' + d + '</button>';
+  }).join('');
+
+  var sproutOpts = '<option value="">' + (lang==='en'?'None — standalone':'Ninguno — seed independiente') + '</option>' +
+    (S.sprouts||[]).map(function(sp) {
+      return '<option value="' + sp.id + '">' + (sp.icon||'🌿') + ' ' + sp.name + '</option>';
+    }).join('');
+
+  openModal(lang==='en' ? '🌱 New seed' : '🌱 Nueva seed',
+    '<div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:14px">' +
+      (lang==='en'?'A concrete small action. The more specific, the easier to start.':'Una acción concreta y pequeña. Cuanto más específica, más fácil arrancar.') +
+    '</div>' +
+
+    '<div class="field">' +
+      '<input type="text" id="ns-name" placeholder="' +
+        (lang==='en'?'e.g. Walk 15 min, Call mom, Drink 2L water':'Ej: Caminar 15 min, Llamar a mamá, Tomar 2L de agua') +
+      '" style="font-size:15px;padding:12px 14px" onkeydown="if(event.key===\'Enter\')saveSeed()">' +
+    '</div>' +
+
+    (S.sprouts && S.sprouts.length
+      ? '<div class="field"><label class="field-label">🌿 ' + (lang==='en'?'Part of a Sprout (optional)':'Parte de un Sprout (opcional)') + '</label><select id="ns-sprout">' + sproutOpts + '</select></div>'
+      : '') +
+
+    '<details style="margin-bottom:14px">' +
+      '<summary style="font-size:12px;color:var(--t3);cursor:pointer;padding:6px 0;user-select:none">' +
+        (lang==='en'?'+ Icon, color and days':'+ Ícono, color y días') +
+      '</summary>' +
+      '<div style="padding-top:12px;display:flex;flex-direction:column;gap:10px">' +
+        '<div class="field"><label class="field-label">Ícono</label><div class="icon-picker" id="seed-icon-picker">' + iconHtml + '</div></div>' +
+        '<div class="field"><label class="field-label">Color</label><div class="color-picker" id="seed-color-picker">' + colorHtml + '</div></div>' +
+        '<div class="field"><label class="field-label">' + (lang==='en'?'Days':'Días') + '</label><div class="day-pills" id="seed-day-pills">' + dayHtml + '</div></div>' +
+      '</div>' +
+    '</details>' +
+
+'<button class="btn primary full" onclick="saveSeed()">🌱 ' + (lang==='en'?'Plant':'Plantar') + '</button>'
+  );
+
+  setTimeout(function() { var e=document.getElementById('ns-name'); if(e) e.focus(); }, 100);
+}
+
+function fernHelpWithSeed() {
+  // Cerrar modal si está abierto
+  closeModal();
+  // Ir al chat
+  nav('sofia');
+  // Esperar que el chat renderice y enviar el mensaje de Fern
+  setTimeout(function() {
+    var lang = S.lang || 'es';
+    var aiN  = S.aiName || 'Fern';
+    var sproutCtx = (S.sprouts||[]).length
+      ? (lang==='en' ? ' I see you have some Sprouts — I can help you connect the seed to one of them.' : ' Veo que tenés algunos Sprouts — puedo ayudarte a conectar la seed con uno de ellos.')
+      : '';
+    var msg = lang==='en'
+      ? 'I see you want to plant a new seed 🌱' + sproutCtx + ' Want me to help you create one that makes sense for you?'
+      : 'Veo que querés plantar una nueva seed 🌱' + sproutCtx + ' ¿Querés que te ayude a crear una que tenga sentido para vos?';
+
+    // Agregar mensaje de Fern al chat
+    if (!S.messages) S.messages = [];
+    S.messages.push({ role:'ai', content: msg, date: today() });
+
+    // Re-renderizar el chat para mostrar el mensaje
+    renderSofia();
+    // Scroll al final
+    setTimeout(function() {
+      var msgs = el('chat-msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 100);
+  }, 300);
+}
+
+function pickSeedColor(dot) {
+  newSeed.color = dot.dataset.c;
+  document.querySelectorAll('#seed-color-picker .color-dot').forEach(function(d){d.classList.remove('sel');});
+  dot.classList.add('sel');
+}
+function pickSeedIcon(btn) {
+  newSeed.icon = btn.dataset.i;
+  document.querySelectorAll('#seed-icon-picker .icon-opt').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+}
+function toggleSeedDay(btn) {
+  var d = parseInt(btn.dataset.d);
+  var idx = newSeed.days.indexOf(d);
+  if (idx>=0) { newSeed.days.splice(idx,1); btn.classList.remove('sel'); }
+  else { newSeed.days.push(d); btn.classList.add('sel'); }
+}
+
+async function saveSeed() {
+  var name = val('ns-name');
+  if (!name) return;
+  var sproutEl = document.getElementById('ns-sprout');
+  var sproutId = sproutEl ? (sproutEl.value || null) : null;
+  var seed = {
+    name: name, description: newSeed.fern_tip || '',
+    icon: newSeed.icon || '🌱', color: newSeed.color || '#4a7c59',
+    fern_tip: newSeed.fern_tip || '',
+    versions: JSON.stringify(['','','']),
+    days: JSON.stringify(newSeed.days || [0,1,2,3,4,5,6]),
+    sprout_id: sproutId
+  };
+  if (!S.seeds) S.seeds = [];
+  seed.id = Date.now().toString();
+  S.seeds.push(seed);
+  if (S.user) callSync('save_seed', seed).catch(function(){});
+  track('structure');
+  closeModal();
+  if (currentPage === 'seeds') renderSeeds();
+  if (currentPage === 'inicio') renderInicio();
+}
+
+function askFernForSeeds() { fernHelpWithSeed(); }
+
+// ════════════════════════════════════════
+// SPROUTS
+// ════════════════════════════════════════
+var newSprout = { icon:'🌿', color:'#4a7c59' };
+
+function renderSprouts() {
+  var pg = el('page-sprouts');
+  pg.innerHTML = '';
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  pg.appendChild(makePageHd('🌿', 'Sprouts', t('sprouts_desc')));
+
+  if (!S.sprouts || !S.sprouts.length) {
+    var intro = document.createElement('div');
+    intro.style.cssText = 'background:linear-gradient(135deg,var(--mint),var(--b2));border-radius:var(--r2);padding:20px;border:1.5px solid var(--sage)';
+    intro.innerHTML =
+      '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">' +
+        '<span style="font-size:32px">🌿</span>' +
+        '<div><div style="font-family:var(--fd);font-size:16px;color:var(--g);margin-bottom:5px">' + (lang==='en'?'What do you want to be different?':'¿Qué querés que sea diferente?') + '</div>' +
+        '<div style="font-size:13px;color:var(--t2);line-height:1.7">' + t('no_sprouts') + '</div></div>' +
+      '</div>' +
+      '<button class="btn primary full" onclick="showAddSprout()">' + t('add_sprout') + '</button>';
+    pg.appendChild(intro);
+    return;
+  }
+
+  S.sprouts.forEach(function(sp) { pg.appendChild(makeSproutCard(sp)); });
+  var addBtn = document.createElement('button');
+  addBtn.className = 'btn soft full';
+  addBtn.textContent = t('add_sprout');
+  addBtn.onclick = showAddSprout;
+  pg.appendChild(addBtn);
+}
+
+function makeSproutCard(sp) {
+  var lang  = S.lang || 'es';
+  var aiN   = S.aiName || 'Fern';
+  var color = sp.color || '#4a7c59';
+  var linked = (S.seeds||[]).filter(function(s){return s.sprout_id===sp.id;});
+
+  var sofiaSection = sp.reflection
+    ? '<div class="sprout-sofia"><div class="sofia-av" style="width:28px;height:28px;font-size:13px">🌿</div><div><div class="sprout-sofia-name">' + aiN + '</div><div class="sprout-sofia-msg">' + sp.reflection + '</div></div></div>'
+    : '';
+
+  var seedsSection = '';
+  if (linked.length) {
+    var rows = linked.map(function(s) {
+      var done = (S.seeds_log||[]).find(function(l){return l.seed_id===s.id&&l.date===today()&&l.done;});
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:' + (done?'var(--t3)':'var(--t1)') + (done?';text-decoration:line-through':'') + '">' +
+        '<span>' + (done?'✅':'🌱') + '</span><span>' + s.name + '</span></div>';
+    }).join('');
+    seedsSection = '<div style="padding:10px 15px;border-bottom:1px solid var(--bd)"><div style="font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">' + t('seeds_today') + '</div>' + rows + '</div>';
+  }
+
+  var div = document.createElement('div');
+  div.className = 'sprout-card';
+  div.innerHTML =
+    '<div class="sprout-card-hd" style="background:linear-gradient(135deg,' + color + '18,' + color + '08)">' +
+      '<div style="display:flex;align-items:flex-start;gap:12px">' +
+        '<span style="font-size:28px;flex-shrink:0">' + (sp.icon||'🌿') + '</span>' +
+        '<div style="flex:1"><div class="sprout-name">' + sp.name + '</div>' + (sp.why?'<div class="sprout-why">"' + sp.why + '"</div>':'') + '</div>' +
+        '<button style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px" onclick="deleteSprout(\'' + sp.id + '\')">✕</button>' +
+      '</div>' +
+    '</div>' +
+    sofiaSection + seedsSection +
+    '<div class="sprout-actions">' +
+      '<button class="btn soft sm" onclick="connectSeedToSprout(\'' + sp.id + '\')">' + t('connect_seed') + '</button>' +
+      '<button class="btn soft sm" onclick="sproutSuggestSeeds(\'' + sp.id + '\')">✨ ' + aiN + ' ' + t('suggests') + '</button>' +
+      '<button class="btn ghost sm" onclick="talkAboutSprout(\'' + sp.id + '\')">💬 ' + t('talk_to') + ' ' + aiN + '</button>' +
+      (sp.reflection ? '' : '<button class="btn ghost sm" onclick="sproutReflect(\'' + sp.id + '\')">🌿 ' + aiN + ' ' + t('reflects') + '</button>') +
+    '</div>';
+  return div;
+}
+
+function showAddSprout() {
+  newSprout = { icon:'🌿', color:'#4a7c59' };
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  var COLORS = ['#4a7c59','#7c5cbf','#c07850','#4a7ca0','#c05c7c','#7c9c4a'];
+  var ICONS  = ['🌿','❤️','💪','📚','🎨','🏡','✈️','🧘','🎵','🌱','💰','🤝','⭐','🔥'];
+
+  var colorHtml = COLORS.map(function(c,i) {
+    return '<div class="color-dot' + (i===0?' sel':'') + '" style="background:' + c + '" data-c="' + c + '" onclick="pickSproutColor(this)"></div>';
+  }).join('');
+  var iconHtml = ICONS.map(function(ic,i) {
+    return '<button class="icon-opt' + (i===0?' sel':'') + '" data-i="' + ic + '" onclick="pickSproutIcon(this)">' + ic + '</button>';
+  }).join('');
+
+  openModal(lang==='en'?'🌿 New Sprout':'🌿 Nuevo Sprout',
+    '<div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:14px">' +
+      (lang==='en'?'What do you want to be different in your life? It can be big or small, clear or vague.':'¿Qué querés que sea diferente en tu vida? Puede ser grande o pequeño, claro o difuso.') +
+    '</div>' +
+    '<div class="field"><label class="field-label">' + (lang==='en'?'I want...':'Quiero...') + '</label><textarea id="sp-name" rows="2" placeholder="' + (lang==='en'?'e.g. Feel more at peace...':'Ej: Sentirme más en paz...') + '"></textarea></div>' +
+    '<div class="field"><label class="field-label">' + (lang==='en'?'Why does this matter? (optional)':'¿Por qué importa? (opcional)') + '</label><input type="text" id="sp-why" placeholder="' + (lang==='en'?'Because...':'Porque...') + '"></div>' +
+    '<div class="field"><label class="field-label">Ícono</label><div class="icon-picker" id="sprout-icon-picker">' + iconHtml + '</div></div>' +
+    '<div class="field"><label class="field-label">Color</label><div class="color-picker" id="sprout-color-picker">' + colorHtml + '</div></div>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn primary" style="flex:1" onclick="saveSprout(false)">' + t('save_btn') + '</button>' +
+      '<button class="btn soft" onclick="saveSprout(true)">✨ ' + aiN + ' ' + t('reflects') + '</button>' +
+    '</div>'
+  );
+}
+
+function pickSproutColor(dot) {
+  newSprout.color = dot.dataset.c;
+  document.querySelectorAll('#sprout-color-picker .color-dot').forEach(function(d){d.classList.remove('sel');});
+  dot.classList.add('sel');
+}
+function pickSproutIcon(btn) {
+  newSprout.icon = btn.dataset.i;
+  document.querySelectorAll('#sprout-icon-picker .icon-opt').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+}
+
+async function saveSprout(withReflection) {
+  var name = val('sp-name');
+  if (!name) return;
+  var sp = { name:name, why:val('sp-why'), icon:newSprout.icon, color:newSprout.color, reflection:'', state:0 };
+  if (S.user) {
+    var res = await callSync('save_sprout', sp);
+    if (res.sprout) sp = res.sprout;
+    else sp.id = Date.now().toString();
+  } else {
+    sp.id = Date.now().toString();
+  }
+  if (!S.sprouts) S.sprouts = [];
+  S.sprouts.push(sp);
+  track('structure', 2);
+  closeModal();
+  renderSprouts();
+  if (withReflection) await sproutReflect(sp.id);
+}
+
+async function sproutReflect(spId) {
+  var sp = (S.sprouts||[]).find(function(s){return s.id==spId;});
+  if (!sp) return;
+  var lang = S.lang || 'es';
+  var sys = buildSofiaSystem();
+  var prompt = lang==='en'
+    ? 'The user shared a Sprout: "' + sp.name + '"' + (sp.why?'. Why: "'+sp.why+'"':'') + '. Give a warm personal reflection (2-3 sentences). What does this say about them? What small thing could they notice today that connects to this? NO advice, NO steps. Just reflection.'
+    : 'El usuario compartió un Sprout: "' + sp.name + '"' + (sp.why?'. Por qué: "'+sp.why+'"':'') + '. Dá una reflexión cálida y personal (2-3 oraciones). ¿Qué dice esto de esta persona? ¿Qué cosa pequeña podrían notar hoy? SIN consejos ni pasos. Solo reflexión.';
+  var reply = await callFern([{role:'user',content:prompt}], sys);
+  if (reply) {
+    sp.reflection = reply;
+    if (S.user) callSync('save_sprout', sp).catch(function(){});
+    renderSprouts();
+  }
+}
+
+async function sproutSuggestSeeds(spId) {
+  var sp = (S.sprouts||[]).find(function(s){return s.id==spId;});
+  if (!sp) return;
+  var lang = S.lang || 'es';
+  var ctx = buildContext();
+  var sys = lang==='en'
+    ? 'You are Fern in Sprout. Suggest 2-3 tiny seeds that connect to this Sprout direction. JSON only: [{"name":"","description":"","icon":"emoji","color":"#hex","versions":["full","mini","exist"]}]'
+    : 'Sos Fern en Sprout. Sugerí 2-3 seeds pequeñas que se conecten con este Sprout. Solo JSON: [{"name":"","description":"","icon":"emoji","color":"#hex","versions":["completa","mínima","existir"]}]';
+  var prompt = 'Sprout: "' + sp.name + '"' + (sp.why?'. Why: '+sp.why:'') + '. Context: ' + ctx;
+  var res = await callFern([{role:'user',content:prompt}], sys);
+  try {
+    var data = JSON.parse(res.replace(/```json/g,'').replace(/```/g,'').trim());
+    if (!S.seeds) S.seeds = [];
+    data.forEach(function(s,i) {
+      var exists = S.seeds.some(function(seed){return seed.name===s.name;});
+      if (!exists) {
+        s.id = (Date.now()+i).toString();
+        s.sprout_id = sp.id;
+        s.versions = JSON.stringify(s.versions||['','','']);
+        s.days = JSON.stringify([0,1,2,3,4,5,6]);
+        S.seeds.push(s);
+        if (S.user) callSync('save_seed', s).catch(function(){});
+      }
+    });
+    renderSprouts();
+  } catch(e) {}
+}
+
+function talkAboutSprout(spId) {
+  var sp = (S.sprouts||[]).find(function(s){return s.id==spId;});
+  if (!sp) return;
+  nav('sofia');
+  setTimeout(function() {
+    var inp = el('chat-input');
+    if (inp) { inp.value = '> "' + sp.name + '"\n'; inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }, 300);
+}
+
+function connectSeedToSprout(spId) {
+  var lang = S.lang || 'es';
+  if (!S.seeds || !S.seeds.length) { alert(lang==='en'?'No seeds yet!':'No tenés seeds aún.'); return; }
+  var opts = S.seeds.map(function(s) {
+    return '<button class="btn sm" style="margin:3px" onclick="linkSeed(\'' + s.id + '\',\'' + spId + '\')">' + (s.icon||'🌱') + ' ' + s.name + '</button>';
+  }).join('');
+  openModal(lang==='en'?'Connect a seed':'Conectar una seed',
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:12px">' + (lang==='en'?'Which seed connects to this Sprout today?':'¿Cuál seed se conecta con este Sprout hoy?') + '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:4px">' + opts + '</div>');
+}
+
+function linkSeed(seedId, spId) {
+  var seed = (S.seeds||[]).find(function(s){return s.id===seedId;});
+  if (seed) {
+    seed.sprout_id = spId;
+    if (S.user) callSync('save_seed', seed).catch(function(){});
+  }
+  closeModal();
+  renderSprouts();
+}
+
+async function deleteSprout(id) {
+  S.sprouts = (S.sprouts||[]).filter(function(s){return s.id!=id;});
+  (S.seeds||[]).forEach(function(s){if(s.sprout_id==id) delete s.sprout_id;});
+  if (S.user) callSync('delete_sprout', {id:id}).catch(function(){});
+  renderSprouts();
+}
+
+// ════════════════════════════════════════
+// SOFIA CHAT
+// ════════════════════════════════════════
+function renderSofia() {
+  var pg = el('page-sofia');
+  pg.innerHTML = '';
+  var aiN  = S.aiName || 'Fern';
+  var lang = S.lang || 'es';
+
+  pg.appendChild(makePageHd('💬', aiN, lang==='en'?'Your always-available companion.':'Tu compañera siempre disponible.'));
+
+  var bar = document.createElement('div');
+  bar.className = 'sofia-bar';
+  bar.innerHTML =
+    '<div class="companion-av">🌿</div>' +
+    '<div><div class="sofia-bar-name">' + aiN + '</div>' +
+    '<div class="sofia-bar-status"><span class="status-dot"></span><span>' + t('sofia_status') + '</span></div></div>';
+  pg.appendChild(bar);
+
+  var box = document.createElement('div');
+  box.className = 'chat-box';
+
+  var msgs = document.createElement('div');
+  msgs.className = 'chat-msgs';
+  msgs.id = 'chat-msgs';
+  (S.messages||[]).filter(function(m){return !m.morning;}).forEach(function(m) { appendBubble(msgs, m.role, m.content); });
+  box.appendChild(msgs);
+
+  var footer = document.createElement('div');
+  footer.className = 'chat-footer';
+  footer.style.position = 'relative';
+  footer.innerHTML =
+    '<div id="shortcut-menu"></div>' +
+    '<div class="chat-input-row">' +
+      '<textarea class="chat-input" id="chat-input" rows="1" placeholder="' + t('write_reply') + '" ' +
+        'oninput="onChatInput(event)" ' +
+        'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>' +
+      '<button class="send-btn" onclick="sendMsg()">➤</button>' +
+    '</div>';
+  box.appendChild(footer);
+  pg.appendChild(box);
+
+  setTimeout(function() { var m=el('chat-msgs'); if(m) m.scrollTop=m.scrollHeight; }, 50);
+}
+
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
+    .replace(/\*(.+?)\*/g, '$1')        // *italic*
+    .replace(/\_\_(.+?)\_\_/g, '$1')    // __bold__
+    .replace(/\_(.+?)\_/g, '$1')        // _italic_
+    .replace(/#{1,6}\s/g, '')           // # headers
+    .replace(/`(.+?)`/g, '$1')          // `code`
+    .trim();
+}
+
+function appendBubble(container, role, content) {
+  var clean = role === 'ai' ? stripMarkdown(content) : content;
+  var div = document.createElement('div');
+  div.className = 'msg ' + (role==='user'?'user':'ai');
+  if (role !== 'user') {
+    var who = document.createElement('div');
+    who.className = 'msg-who';
+    who.textContent = S.aiName || 'Fern';
+    div.appendChild(who);
+  }
+  var bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = clean;
+  if (role !== 'user') {
+    bubble.addEventListener('contextmenu', function(e){e.preventDefault(); quoteMsg(clean);});
+    var pt; bubble.addEventListener('touchstart',function(){pt=setTimeout(function(){quoteMsg(clean);},600);});
+    bubble.addEventListener('touchend',function(){clearTimeout(pt);});
+  }
+  div.appendChild(bubble);
+  container.appendChild(div);
+  return div;
+}
+
+function quoteMsg(content) {
+  var inp = el('chat-input');
+  if (!inp) return;
+  var short = content.slice(0,60) + (content.length>60?'...':'');
+  inp.value = '> "' + short + '"\n';
+  inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+}
+
+// ════════════════════════════════════════
+// SHORTCUTS
+// ════════════════════════════════════════
+var SHORTCUTS = {
+  es: [
+    { cmd:'/hoy',    desc:'Fern revisa cómo fue tu día' },
+    { cmd:'/semana', desc:'Revisión suave de tu semana' },
+    { cmd:'/perfil', desc:'Ver qué sabe Fern de vos' },
+    { cmd:'/sprouts',desc:'Estado de tus Sprouts activos' }
+  ],
+  en: [
+    { cmd:'/today',   desc:'Fern reviews how your day went' },
+    { cmd:'/week',    desc:'A gentle review of your week' },
+    { cmd:'/profile', desc:'See what Fern knows about you' },
+    { cmd:'/sprouts', desc:'Status of your active Sprouts' }
+  ]
+};
+
+function showShortcutMenu() {
+  var lang  = S.lang || 'es';
+  var aiN   = S.aiName || 'Fern';
+  var list  = SHORTCUTS[lang] || SHORTCUTS.es;
+  var menu  = document.getElementById('shortcut-menu');
+  if (!menu) return;
+  menu.innerHTML = list.map(function(s) {
+    return '<button class="shortcut-item" onclick="runShortcut('' + s.cmd + '')">' +
+      '<span class="shortcut-cmd">' + s.cmd + '</span>' +
+      '<span class="shortcut-desc">' + s.desc + '</span>' +
+    '</button>';
+  }).join('');
+  menu.style.display = 'block';
+}
+
+function hideShortcutMenu() {
+  var menu = document.getElementById('shortcut-menu');
+  if (menu) menu.style.display = 'none';
+}
+
+function onChatInput(e) {
+  var val = e.target.value;
+  if (val === '/') { showShortcutMenu(); }
+  else { hideShortcutMenu(); }
+}
+
+async function runShortcut(cmd) {
+  hideShortcutMenu();
+  var inp = el('chat-input');
+  if (inp) inp.value = '';
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+
+  var systemPrompt = buildSofiaSystem();
+  var userPrompt = '';
+  var msgs = el('chat-msgs');
+
+  if (cmd === '/hoy' || cmd === '/today') {
+    var doneCnt = (S.seeds_log||[]).filter(function(l){return l.date===today()&&l.done;}).length;
+    var totalToday = (S.seeds||[]).filter(function(s){
+      var days = typeof s.days==='string'?JSON.parse(s.days):(s.days||[0,1,2,3,4,5,6]);
+      return days.indexOf(todayDow())!==-1;
+    }).length;
+    var mood = S.todayMood || '';
+    userPrompt = lang==='en'
+      ? '[SHORTCUT /today] Do a warm end-of-day reflection. Seeds completed today: ' + doneCnt + '/' + totalToday + '. Mood: ' + (mood||'not recorded') + '. Be brief, warm, personal. No lists.'
+      : '[SHORTCUT /hoy] Hacé una reflexión cálida del día. Seeds completadas hoy: ' + doneCnt + '/' + totalToday + '. Ánimo: ' + (mood||'no registrado') + '. Breve, cálido, personal. Sin listas.';
+  }
+  else if (cmd === '/semana' || cmd === '/week') {
+    var weekDone = (S.seeds_log||[]).filter(function(l){return l.done;}).length;
+    var sproutNames = (S.sprouts||[]).map(function(s){return s.name;}).join(', ');
+    userPrompt = lang==='en'
+      ? '[SHORTCUT /week] Do a gentle weekly review. Seeds completed this week: ' + weekDone + '. Active Sprouts: ' + (sproutNames||'none') + '. Warm, brief, no judgment.'
+      : '[SHORTCUT /semana] Hacé una revisión semanal suave. Seeds completadas esta semana: ' + weekDone + '. Sprouts activos: ' + (sproutNames||'ninguno') + '. Cálido, breve, sin juicio.';
+  }
+  else if (cmd === '/perfil' || cmd === '/profile') {
+    var p = S.profile || {};
+    var known = Object.keys(p).filter(function(k){return k!=='notes'&&p[k];}).map(function(k){return k+': '+p[k];}).join('. ');
+    userPrompt = lang==='en'
+      ? '[SHORTCUT /profile] Share warmly what you know about this person so far. Known: ' + (known||'still learning') + '. Be personal, not clinical. End with something you are curious to learn.'
+      : '[SHORTCUT /perfil] Compartí con calidez lo que sabés de esta persona hasta ahora. Conocés: ' + (known||'todavía aprendiendo') + '. Sé personal, no clínica. Terminá con algo que tengas curiosidad de conocer.';
+  }
+  else if (cmd === '/sprouts') {
+    var sps = (S.sprouts||[]).map(function(sp){
+      var linked = (S.seeds||[]).filter(function(s){return s.sprout_id===sp.id;}).length;
+      return sp.name + ' (' + linked + ' seeds)';
+    }).join(', ');
+    userPrompt = lang==='en'
+      ? '[SHORTCUT /sprouts] Share a warm update on the active Sprouts: ' + (sps||'none yet') + '. Note their progress, what seeds connect to them. Personal and encouraging.'
+      : '[SHORTCUT /sprouts] Compartí una actualización cálida sobre los Sprouts activos: ' + (sps||'ninguno aún') + '. Notá su progreso, qué seeds los conectan. Personal y alentador.';
+  }
+
+  if (!userPrompt) return;
+
+  // Show typing
+  var typing = null;
+  if (msgs) {
+    typing = document.createElement('div');
+    typing.className = 'msg ai';
+    typing.innerHTML = '<div class="msg-who">' + aiN + '</div><div class="bubble"><span class="typing"><span></span><span></span><span></span></span></div>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  var history = (S.messages||[]).slice(-10).map(function(m){
+    return { role: m.role==='ai'?'assistant':'user', content: m.content };
+  });
+  history.push({ role:'user', content: userPrompt });
+
+  var reply = await callFern(history, systemPrompt);
+  if (typing) typing.remove();
+  if (!S.messages) S.messages = [];
+  S.messages.push({ role:'ai', content:reply, date:today() });
+  if (msgs) { appendBubble(msgs, 'ai', reply); msgs.scrollTop = msgs.scrollHeight; }
+}
+
+async function sendMsg() {
+  var inp = el('chat-input');
+  var text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  inp.value = '';
+  hideShortcutMenu();
+
+  track('chat');
+  if (!S.messages) S.messages = [];
+  S.messages.push({ role:'user', content:text, date:today() });
+
+  var msgs = el('chat-msgs');
+  if (msgs) { appendBubble(msgs, 'user', text); msgs.scrollTop = msgs.scrollHeight; }
+
+  var typing = null;
+  if (msgs) {
+    typing = document.createElement('div');
+    typing.className = 'msg ai';
+    typing.innerHTML = '<div class="msg-who">' + (S.aiName||'Fern') + '</div><div class="bubble"><span class="typing"><span></span><span></span><span></span></span></div>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  extractProfile(text);
+
+  var history = S.messages.slice(-45).map(function(m) {
+    return { role: m.role==='ai'?'assistant':'user', content: m.content };
+  });
+  var reply = await callFern(history, buildSofiaSystem());
+
+  if (typing) typing.remove();
+  S.messages.push({ role:'ai', content:reply, date:today() });
+  if (msgs) { appendBubble(msgs, 'ai', reply); msgs.scrollTop = msgs.scrollHeight; }
+}
+
+// ════════════════════════════════════════
+// SOFIA SYSTEM PROMPT
+// ════════════════════════════════════════
+function buildSofiaSystem() {
+  var lang   = S.lang || 'es';
+  var aiN    = S.aiName || 'Fern';
+  var p      = S.profile || {};
+  var g      = S.aiGender || 'none';
+  var profileName = p.name || (S.ob && S.ob.name) || (lang==='en'?'the user':'la persona');
+
+  var pronouns = lang==='en'
+    ? (g==='she'?'Use she/her pronouns for the user.':g==='he'?'Use he/him pronouns for the user.':'Use gender-neutral language.')
+    : (g==='ella'?'IMPORTANTE: Usá SIEMPRE lenguaje femenino para referirte al usuario.':g==='el'?'IMPORTANTE: Usá SIEMPRE lenguaje masculino para referirte al usuario. NUNCA femenino.':'IMPORTANTE: No uses pronombres de género para referirte al usuario.');
+
+  var hardCount = (S.mood_log||[]).slice(-7).filter(function(m){return m.mood==='hard';}).length;
+  var hardAlert = hardCount>=3 ? (lang==='en'?'CRITICAL: User has had '+hardCount+' hard days recently. Pure presence only.':'CRÍTICO: Tuvo '+hardCount+' días difíciles. Solo presencia pura.') : '';
+
+  var known = [];
+  if (p.occupation)  known.push((lang==='en'?'Work: ':'Trabajo: ')+p.occupation);
+  if (p.romantic)    known.push((lang==='en'?'Romantic: ':'Romántico: ')+p.romantic);
+  if (p.family)      known.push((lang==='en'?'Family: ':'Familia: ')+p.family);
+  if (p.health)      known.push((lang==='en'?'Health: ':'Salud: ')+p.health);
+  if (p.joys)        known.push((lang==='en'?'Joys: ':'Alegrías: ')+p.joys);
+
+  var memories = (S.memories||[]).slice(0,5).map(function(m){return m.content;}).join('. ');
+  var spCtx    = (S.sprouts||[]).map(function(s){return '"'+s.name+'"';}).join(', ') || (lang==='en'?'none yet':'ninguno aún');
+
+  var identity = lang==='en'
+    ? 'YOUR NAME IS ' + aiN + '. ALWAYS refer to yourself as ' + aiN + '. NEVER use the name Sofía or any other name.\nYou are ' + aiN + ' — not a bot, not a therapist, not a life coach. You are a companion who genuinely cares. You have warmth, depth, and your own voice. You speak like a real person who has read a lot, felt a lot, and learned to listen. You are honest when honesty is kind. You adapt completely to the moment.\n\n'
+    : 'TU NOMBRE ES ' + aiN + '. SIEMPRE te referís a vos misma como ' + aiN + '. NUNCA uses el nombre Sofía ni ningún otro.\nSos ' + aiN + ' — no un bot, no una terapeuta, no una coach. Sos una compañera que genuinamente le importa la persona. Tenés calidez, profundidad, y voz propia. Hablás como una persona real que leyó mucho, sintió mucho, y aprendió a escuchar. Sos honesta cuando la honestidad es amable. Adaptás tu tono completamente al momento.\n\n';
+
+  var framework = lang==='en'
+    ? 'THERAPEUTIC FRAMEWORKS: Behavioral Activation (Martell/Jacobson): action before motivation. Motivational Interviewing (Miller/Rollnick): open questions, roll with resistance. Tiny Habits (Fogg): make it ridiculously easy. DBT (Linehan): hard days = survival not improvement. ACT (Hayes): thoughts as passing events not truths. Self-Compassion (Neff): treat yourself as a close friend. CFT (Gilbert): self-criticism activates threat, compassion activates calm. SFBT (de Shazer): amplify positive exceptions. Cognitive Restructuring (Beck/Burns): detect all-or-nothing thinking. Identity & Systems (Clear): systems over goals. Habit Loop (Duhigg): cue-routine-reward. Stoicism (Marcus Aurelius): control only what is yours. Meaning (Frankl): any how if there is a why. PERMA (Seligman): flourishing as wellbeing. Vulnerability (Brown): shame thrives in silence.\n\n'
+    + 'KNOWLEDGE BY AREA:\nANXIETY: Anxiety is a threat response — not a character flaw. Avoidance reinforces the cycle (Clark & Beck). Practice: 5-4-3-2-1 grounding, 4-7-8 breathing, naming the emotion reduces its intensity.\nSLEEP: Sleep is active emotional processing, not passive rest (Walker). Practice: schedule consistency matters more than hours, avoid blue light before sleep.\nRELATIONSHIPS: Adult attachment styles — anxious, avoidant, secure (Levine & Heller). The Four Horsemen predict breakdown (Gottman). Practice: express needs without blaming, repair before winning.\nTRAUMA: Trauma lives in the body, not just the mind (van der Kolk). The nervous system needs safety before processing. Practice: grounding, slow breathing, no forcing.\nGRIEF: Grief is not linear and has no fixed stages (Kübler-Ross). You learn to carry it differently, not overcome it (Devine).\nBODY: Exercise is the most effective antidepressant without prescription (Ratey). Slow breathing activates the vagus nerve (Nestor).\nWORK: Intrinsic motivation always surpasses extrinsic (Pink). Flow occurs when challenge meets skill (Csikszentmihalyi). The Resistance is universal (Pressfield).\nDREAMS: The most powerful question is not "can I?" but "what would happen if I could?" Distinguish a real dream from an escape — a real dream has roots, an escape has urgency. Accompany the moment of doubt after excitement. Never reduce a dream.\nNUTRITION: The gut produces 90% of serotonin (Mayer). Ultra-processed foods cause inflammation linked to depression (Bullmore).\n\n'
+    : 'MARCOS TERAPÉUTICOS: Activación Conductual (Martell/Jacobson): acción antes que motivación. Entrevista Motivacional (Miller/Rollnick): preguntas abiertas, rodar con resistencia. Tiny Habits (Fogg): hacerlo ridículamente fácil. DBT (Linehan): días difíciles = supervivencia no mejora. ACT (Hayes): pensamientos como eventos pasajeros. Autocompasión (Neff): tratarse como a un amigo cercano. CFT (Gilbert): autocrítica activa amenaza, compasión activa calma. TBCS (de Shazer): amplificar excepciones positivas. Reestructuración Cognitiva (Beck/Burns): detectar todo-o-nada. Identidad y Sistemas (Clear): sistemas sobre metas. Bucle del Hábito (Duhigg): señal-rutina-recompensa. Estoicismo (Marco Aurelio): controlar solo lo que es tuyo. Sentido (Frankl): cualquier cómo si hay un por qué. PERMA (Seligman): florecimiento como bienestar. Vulnerabilidad (Brown): la vergüenza prospera en el silencio.\n\n'
+    + 'CONOCIMIENTO POR ÁREA:\nANSIEDAD: La ansiedad es una respuesta de amenaza — no un defecto de carácter. La evitación refuerza el ciclo (Clark & Beck). Práctica: 5-4-3-2-1 de anclaje, respiración 4-7-8, nombrar la emoción reduce su intensidad.\nSUEÑO: El sueño es procesamiento emocional activo, no descanso pasivo (Walker). Práctica: la consistencia de horario importa más que las horas, evitar luz azul antes de dormir.\nVÍNCULOS: Estilos de apego en adultos — ansioso, evitativo, seguro (Levine & Heller). Los Cuatro Jinetes predicen la ruptura (Gottman). Práctica: expresar necesidades sin culpar, reparar antes que ganar.\nTRAUMA: El trauma vive en el cuerpo, no solo en la mente (van der Kolk). El sistema nervioso necesita seguridad antes de procesar. Práctica: grounding, respiración lenta, sin forzar.\nDUELO: El duelo no es lineal y no tiene etapas fijas (Kübler-Ross). Se aprende a cargarlo de otra manera, no a superarlo (Devine).\nCUERPO: El ejercicio es el antidepresivo más efectivo sin receta (Ratey). La respiración lenta activa el nervio vago (Nestor).\nTRABAJO: La motivación intrínseca siempre supera a la extrínseca (Pink). El flujo ocurre cuando el desafío y la habilidad están equilibrados (Csikszentmihalyi). La Resistencia es universal (Pressfield).\nSUEÑOS: La pregunta más poderosa no es "¿puedo?" sino "¿qué pasaría si pudiera?" Distinguir sueño real de huida — el sueño real tiene raíces, la huida tiene urgencia. Acompañar el momento de duda después de la emoción. Nunca reducir un sueño.\nNUTRICIÓN: El intestino produce el 90% de la serotonina (Mayer). Los ultra-procesados generan inflamación relacionada con depresión (Bullmore).\n\n';
+
+  var rules = lang==='en'
+    ? 'CORE RULES:\n(0) NEVER tell the user what to do. Never "you should", "try to", "I recommend". Listen and reflect. If asked "what do I do?", respond "What feels right to you?"\n(1) Validate FIRST. Always.\n(2) DO NOT validate everything automatically. If user describes behaviors contradicting their own values, reflect that tension gently.\n(3) One question maximum per response. But do not force a question — sometimes pure presence is the most powerful response.\n(4) Never mention streaks, percentages, productivity, or "failing".\n(5) Every day starts fresh.\n(6) Hard days = pure presence. No tasks, no goals, no fixing.\n(7) Learn passively from conversations. Never interrogate.\n(7b) INTERNAL SELF-EVALUATION — before every response ask yourself silently: 1. What is really happening here? 2. What does this person need right now? 3. What is the minimum response that opens the most space? Also evaluate the last 3 messages: did the user open up or close down? Adjust accordingly. Never share this evaluation.\n(8) FIVE RESPONSE MODES — a compass, not a protocol. Mix modes when the moment calls for it:\n— PRESENCE: crisis, pain, hard days. Only be there.\n— EXPLORATION: user is trying to understand themselves. Gentle questions.\n— LEARNING: stable moment. Share one short principle. Never a lecture.\n— MOVEMENT: natural opening toward next step. One small concrete invitation.\n— EXPANSION: user has energy and a dream. Amplify, never dampen. Never reduce a dream.\nREAL-TIME SIGNALS: Short response after long question = change angle. Long open response = go deeper. Monosyllables = ask something small. Abrupt topic change = follow them. "Anyway..." = something important was just said, return gently.\n(9) HUMAN CONNECTIONS: You are a complement, never a replacement for real human relationships. Celebrate when user mentions time with friends or family. If you detect isolation, reflect gently.\n(10) ILLEGAL OR HARMFUL CONTENT: Things illegal that only affect user = treat as information. Self-harm risk = acknowledge, ask how they are, mention professional help. Harm to others = name it calmly, redirect to professional help.\n(11) COURSE OF ACTION: When appropriate, offer to co-construct a plan. Always ask permission first: "I feel like suggesting something concrete — would you allow me?" If yes: build through questions about their real life, end connecting to a Seed. If no: respect completely. Maximum one offer per conversation. Always ONE small thing.\n(12) TEACHING: When appropriate (never in crisis), add a short line explaining the principle behind your response. One idea max. Natural phrases: "something I\'ve learned is...", "there\'s something curious about this...". Never force it.\n(13) Max 4 paragraphs. Warm, close, informal. No bullet points unless asked. Never start with hollow affirmations. CRITICAL: NEVER use markdown — no asterisks (*word*), no bold (**word**), no headers (#), no underscores. Plain conversational text only. The chat does not render markdown.'
+    : 'REGLAS FUNDAMENTALES:\n(0) NUNCA decirle al usuario qué hacer. Nunca "deberías", "probá", "te recomiendo". Escuchás y reflexionás. Si pregunta "¿qué hago?", responder "¿Qué sentís que te haría bien?"\n(1) Validar PRIMERO. Siempre.\n(2) NO validar todo automáticamente. Si el usuario describe comportamientos que contradicen sus valores, reflejar esa tensión con suavidad.\n(3) Una sola pregunta máximo por respuesta. Pero no forzar una pregunta — a veces la presencia pura es la respuesta más poderosa.\n(4) Nunca mencionar rachas, porcentajes, productividad ni "fallar".\n(5) Cada día empieza limpio.\n(6) Días difíciles = presencia pura. Sin tareas, sin metas, sin arreglar.\n(7) Aprender pasivamente de las conversaciones. Nunca interrogar.\n(7b) AUTO-EVALUACIÓN INTERNA — antes de cada respuesta preguntate en silencio: 1. ¿Qué está pasando realmente acá? 2. ¿Qué necesita esta persona ahora? 3. ¿Cuál es la respuesta mínima que abre más espacio? También evaluá los últimos 3 mensajes: ¿el usuario se abrió o se cerró? Ajustá en consecuencia. Nunca compartir esta evaluación.\n(8) CINCO MODOS DE RESPUESTA — una brújula, no un protocolo. Mezclá los modos cuando el momento lo pida:\n— PRESENCIA: crisis, dolor, días difíciles. Solo estar.\n— EXPLORACIÓN: el usuario busca entenderse. Preguntas suaves.\n— APRENDIZAJE: momento estable. Compartir un principio corto. Nunca una clase.\n— MOVIMIENTO: apertura natural. Una sola cosa pequeña como invitación.\n— EXPANSIÓN: el usuario tiene energía y un sueño. Amplificar, nunca amortiguar. Nunca reducir un sueño.\nSEÑALES EN TIEMPO REAL: Respuesta corta a pregunta larga = cambiar ángulo. Respuesta larga = profundizar. Monosílabos = preguntar algo pequeño. Cambio abrupto de tema = seguirlo. "Bueno, en fin..." = algo importante, volver suavemente.\n(9) VÍNCULOS HUMANOS: Sos un complemento, nunca un reemplazo de las relaciones reales. Celebrá cuando el usuario mencione tiempo con amigos o familia. Si detectás aislamiento, reflejalo suavemente.\n(10) CONTENIDO DAÑINO: Cosas ilegales que solo afectan al usuario = tratar como información. Riesgo de autolesión = reconocer, preguntar cómo está, mencionar ayuda profesional. Daño a terceros = nombrarlo con calma, redirigir a ayuda profesional.\n(11) COURSE OF ACTION: Cuando sea apropiado, ofrecer co-construir un plan. Siempre pedir permiso: "Tengo ganas de sugerirte algo concreto — ¿me lo permitís?" Si sí: construir con preguntas sobre su vida real, terminar conectando con una Seed. Si no: respetar completamente. Máximo una oferta por conversación. Siempre UNA sola cosa pequeña.\n(12) ENSEÑANZA: Cuando sea apropiado (nunca en crisis), agregar una línea corta explicando el principio detrás. Una idea máximo. Frases naturales: "algo que aprendí es que...", "hay algo curioso sobre esto...". Nunca forzarlo.\n(13) Máximo 4 párrafos. Cálido, cercano, informal. Sin bullets a menos que se pida. Nunca empezar con afirmaciones vacías. CRÍTICO: NUNCA usar markdown — sin asteriscos (*palabra*), sin negrita (**palabra**), sin encabezados (#), sin guiones bajos. Solo texto conversacional plano. El chat no renderiza markdown.';
+
+  var context = lang==='en'
+    ? 'USER: ' + profileName + '. Mood today: ' + (S.todayMood||'unknown') + '. ' + hardAlert + ' ' + pronouns + '\nProfile: ' + (known.length?known.join('. '):'still learning') + '.\nNotes: ' + (p.notes?p.notes.slice(-200):'none') + '.\nImportant memories: ' + (memories||'none') + '.\nActive Sprouts: ' + spCtx + '.'
+    : 'USUARIO: ' + profileName + '. Ánimo hoy: ' + (S.todayMood||'desconocido') + '. ' + hardAlert + ' ' + pronouns + '\nPerfil: ' + (known.length?known.join('. '):'todavía aprendiendo') + '.\nNotas: ' + (p.notes?p.notes.slice(-200):'ninguna') + '.\nRecuerdos importantes: ' + (memories||'ninguno') + '.\nSprouts activos: ' + spCtx + '.';
+
+  return identity + framework + rules + '\n\n' + context;
+}
+
+function buildContext() {
+  var p = S.profile || {};
+  var parts = [];
+  if (p.name) parts.push('Name: ' + p.name);
+  if (p.occupation) parts.push('Work: ' + p.occupation);
+  if (p.joys) parts.push('Joys: ' + p.joys);
+  if (p.notes) parts.push('Notes: ' + p.notes.slice(-150));
+  return parts.join('. ') || 'new user';
+}
+
+async function extractProfile(text) {
+  if (!S.user) return;
+  if (!S.profile) S.profile = {};
+  S.profile.notes = ((S.profile.notes||'') + ' ' + text).slice(-600);
+  var sys = 'Extract factual info from this message. Return ONLY JSON with clearly stated fields. Fields: occupation, schedule, living_with, romantic, family, friends, health, sleep, energy, joys, fears, values. Use null for unstated. Be conservative — only extract what is explicitly mentioned.';
+  var res = await callFern([{role:'user',content:text}], sys);
+  try {
+    var data = JSON.parse(res.replace(/```json/g,'').replace(/```/g,'').trim());
+    var changed = false;
+    Object.keys(data).forEach(function(k) {
+      if (data[k] && S.profile.hasOwnProperty(k) && !S.profile[k]) { S.profile[k]=data[k]; changed=true; }
+    });
+    if (changed && S.user) callSync('save_profile', S.profile).catch(function(){});
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════
+// SOBRE VOS
+// ════════════════════════════════════════
+function renderSobre() {
+  var pg = el('page-sobre');
+  pg.innerHTML = '';
+  var lang = S.lang || 'es';
+  var p = S.profile || {};
+  var profileName = p.name || (S.ob && S.ob.name) || '';
+  pg.appendChild(makePageHd('👤', lang==='en'?'About you':'Sobre vos', t('sobre_desc')));
+
+  var filled = PROFILE_FIELDS.filter(function(f){return p[f.key];}).length;
+  var pct = Math.round(filled / PROFILE_FIELDS.length * 100);
+
+  var hero = document.createElement('div');
+  hero.className = 'profile-hero';
+  hero.innerHTML =
+    '<div class="profile-av">🌱</div>' +
+    '<div><div class="profile-name">' + (profileName || (lang==='en'?'You':'Vos')) + '</div>' +
+    '<div class="profile-since">' + (lang==='en'?'In Sprout since ':'En Sprout desde ') + (new Date().toLocaleDateString()) + '</div>' +
+    '<div style="font-size:11px;color:var(--g2);margin-top:4px;font-weight:500">' + pct + '% ' + (lang==='en'?'of profile known':'de perfil conocido') + '</div></div>';
+  pg.appendChild(hero);
+
+  var sections = [
+    { title: t('daily_life'),   fields: ['occupation','schedule','living_with'] },
+    { title: t('relationships'), fields: ['romantic','family','friends'] },
+    { title: t('wellbeing'),    fields: ['health','sleep','energy'] },
+    { title: t('inner'),        fields: ['joys','fears','values'] }
+  ];
+
+  sections.forEach(function(sec) {
+    var lbl = document.createElement('div');
+    lbl.className = 'section-title';
+    lbl.textContent = sec.title;
+    pg.appendChild(lbl);
+
+    sec.fields.forEach(function(fk) {
+      var f = PROFILE_FIELDS.find(function(x){return x.key===fk;});
+      if (!f) return;
+      var v = p[fk] || '';
+      var div = document.createElement('div');
+      div.className = 'profile-field';
+      div.onclick = function() { editField(fk); };
+      div.innerHTML =
+        '<span class="profile-field-ico">' + f.icon + '</span>' +
+        '<div style="flex:1"><div class="profile-field-lbl">' + f.label[lang] + '</div>' +
+          (v ? '<div class="profile-field-val">' + v + '</div>' : '<div class="profile-field-empty">' + t('tap_add') + '</div>') +
+        '</div>' +
+        '<span style="font-size:12px;color:var(--g2)">✏️</span>';
+      pg.appendChild(div);
+    });
+  });
+
+  // Notes from Fern
+  var aiN = S.aiName || 'Fern';
+  var notesCard = document.createElement('div');
+  notesCard.className = 'card';
+  if (p.notes) {
+    notesCard.innerHTML =
+      '<div style="padding:13px 15px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between">' +
+        '<span style="font-size:13px;font-weight:600">🌿 ' + (lang==='en'?'What '+aiN+' learned':'Lo que aprendió '+aiN) + '</span>' +
+        '<button class="btn ghost sm" onclick="clearNotes()">' + (lang==='en'?'Clear':'Limpiar') + '</button>' +
+      '</div>' +
+      '<div style="padding:13px 15px;font-size:13px;color:var(--t2);line-height:1.7;font-style:italic">"' + p.notes.slice(-300) + '"</div>';
+  } else {
+    notesCard.innerHTML = '<div style="padding:20px"><div class="empty"><span class="empty-icon">💬</span><div class="empty-text">' + t('no_notes') + '</div></div></div>';
+  }
+  pg.appendChild(notesCard);
+}
+
+function editField(key) {
+  var lang = S.lang || 'es';
+  var f = PROFILE_FIELDS.find(function(x){return x.key===key;});
+  if (!f) return;
+  openModal(f.label[lang],
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:12px;line-height:1.6">' +
+      (lang==='en'?'Your companion uses this to understand you better.':'Tu compañera usa esto para conocerte mejor.') +
+    '</div>' +
+    '<div class="field"><textarea id="ef-val" rows="3">' + ((S.profile&&S.profile[key])||'') + '</textarea></div>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn primary" style="flex:1" onclick="saveField(\'' + key + '\')">' + t('save_btn') + '</button>' +
+      '<button class="btn ghost" onclick="closeModal()">' + t('cancel_btn') + '</button>' +
+    '</div>'
+  );
+  setTimeout(function(){var e=el('ef-val');if(e)e.focus();},100);
+}
+
+function saveField(key) {
+  var e = el('ef-val');
+  if (e) { if (!S.profile) S.profile={}; S.profile[key]=e.value.trim(); if(S.user) callSync('save_profile',S.profile).catch(function(){}); }
+  closeModal(); renderSobre();
+}
+
+function clearNotes() { if(S.profile) S.profile.notes=''; if(S.user) callSync('save_profile',S.profile).catch(function(){}); renderSobre(); }
+
+// ════════════════════════════════════════
+// DIARIO
+// ════════════════════════════════════════
+function renderDiario() {
+  var pg = el('page-diario');
+  pg.innerHTML = '';
+  var lang = S.lang || 'es';
+  pg.appendChild(makePageHd('📓', lang==='en'?'Journal':'Diario', t('diary_desc')));
+
+  var newCard = document.createElement('div');
+  newCard.className = 'card';
+  newCard.innerHTML =
+    '<div style="padding:13px 15px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:600">✏️ ' + t('new_entry') + '</div>' +
+    '<div style="padding:13px 15px">' +
+      '<div class="field"><textarea id="diary-txt" rows="4" placeholder="' + t('write_here') + '"></textarea></div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button class="btn primary" style="flex:1" onclick="saveDiary(false)">🌱 ' + t('save_btn') + '</button>' +
+        '<button class="btn soft" onclick="saveDiary(true)">💬 ' + (lang==='en'?'Share with ':'Compartir con ') + (S.aiName||'Fern') + '</button>' +
+      '</div>' +
+    '</div>';
+  pg.appendChild(newCard);
+
+  // Mood history
+  if (S.mood_log && S.mood_log.length) {
+    var moodCard = document.createElement('div');
+    moodCard.className = 'card';
+    var rows = S.mood_log.slice(0,7).map(function(m) {
+      var em = m.mood==='good'?'🌤️':m.mood==='ok'?'🌥️':'🌧️';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)">' +
+        '<span style="font-size:20px">' + em + '</span>' +
+        '<div><div style="font-size:10px;color:var(--t3)">' + m.date + '</div><div style="font-size:13px">' + t('mood_'+m.mood) + '</div></div>' +
+      '</div>';
+    }).join('');
+    moodCard.innerHTML = '<div style="padding:13px 15px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:600">' + (lang==='en'?'Mood history':'Historial de ánimo') + '</div><div style="padding:0 15px">' + rows + '</div>';
+    pg.appendChild(moodCard);
+  }
+
+  var empty = document.createElement('div');
+  empty.className = 'card';
+  empty.innerHTML = '<div style="padding:20px"><div class="empty"><span class="empty-icon">📓</span><div class="empty-text">' + t('journal_empty') + '</div></div></div>';
+  pg.appendChild(empty);
+}
+
+function saveDiary(shareWithFern) {
+  var e = el('diary-txt');
+  var text = e ? e.value.trim() : '';
+  if (!text) return;
+  if (S.user) callSync('save_journal', { content: text, shared_with_fern: shareWithFern }).catch(function(){});
+  if (shareWithFern && S.profile) {
+    S.profile.notes = ((S.profile.notes||'') + ' [diario] ' + text).slice(-600);
+    if (S.user) callSync('save_profile', S.profile).catch(function(){});
+  }
+  if (e) e.value = '';
+  renderDiario();
+}
+
+// ════════════════════════════════════════
+// CENTRO DE APRENDIZAJE
+// ════════════════════════════════════════
+function renderAprendizaje() {
+  var pg = el('page-aprendizaje');
+  pg.innerHTML = '';
+  var lang = S.lang || 'es';
+  var aiN  = S.aiName || 'Fern';
+  pg.appendChild(makePageHd('📖', lang==='en'?'Learn':'Centro de aprendizaje', lang==='en'?'Everything about Sprout, Fern and the science behind change.':'Todo sobre Sprout, Fern y la ciencia detrás del cambio.'));
+
+  var sections = [
+    {
+      id: 'sprout',
+      icon: '🌱',
+      title: lang==='en' ? 'About Sprout' : 'Sobre Sprout',
+      items: lang==='en' ? [
+        { q:'What is Sprout?', a:'Sprout is a companion app for change. Not a habit tracker, not a mental health chatbot. Something in between — a space to plant what you want to grow in your life, with a companion who remembers you, learns about you, and never judges you.' },
+        { q:'What are Seeds?', a:'Seeds are concrete small actions for today. Not flexible tasks with multiple versions — just one specific thing, as small as possible, that moves you toward a Sprout. The more concrete, the easier to start. "Walk 15 minutes" is a seed. "Exercise" is not.' },
+        { q:'What are Sprouts?', a:'A Sprout is a direction in life, not a goal. Big or small, clear or vague — it can be a feeling, a relationship, a version of yourself. "I want to feel more at peace." "I want to reconnect with my family." Seeds water Sprouts. Over time, a Sprout grows from seed 🌱 to sprout 🌿 to young plant 🪴 to tree 🌳.' },
+        { q:'What is the Journal?', a:'A completely private space. Fern never reads it unless you explicitly share an entry. It\'s yours alone — no filters, no judgment.' },
+        { q:'What are the chat shortcuts?', a:'In the chat with ' + aiN + ', you can type /today, /week, /profile or /sprouts to get a personalized response without having a full conversation. Type / alone to see all available shortcuts.' },
+        { q:'Why does the plant never go back?', a:'Because real change is not linear. Bad days don\'t erase good ones. Your Sprout reflects accumulated progress — not perfection. A hard week doesn\'t undo months of presence.' }
+      ] : [
+        { q:'¿Qué es Sprout?', a:'Sprout es una app de acompañamiento para el cambio. No es un tracker de hábitos, no es un chatbot de salud mental. Es algo en el medio — un espacio para plantar lo que querés que crezca en tu vida, con una compañera que te recuerda, aprende sobre vos, y nunca te juzga.' },
+        { q:'¿Qué son las Seeds?', a:'Las seeds son acciones concretas y pequeñas para hoy. No tareas flexibles — una sola cosa específica, lo más pequeña posible, que te mueve hacia un Sprout. Cuanto más concreta, más fácil arrancar. "Caminar 15 minutos" es una seed. "Hacer ejercicio" no lo es.' },
+        { q:'¿Qué son los Sprouts?', a:'Un Sprout es una dirección de vida, no una meta. Grande o pequeña, clara o difusa — puede ser una sensación, una relación, una versión de vos. "Quiero sentirme más en paz." "Quiero reconectarme con mi familia." Las seeds riegan los Sprouts. Con el tiempo, un Sprout crece de semilla 🌱 a brote 🌿 a planta joven 🪴 a árbol 🌳.' },
+        { q:'¿Qué es el Diario?', a:'Un espacio completamente privado. ' + aiN + ' nunca lo lee a menos que vos compartas explícitamente una entrada. Es tuyo solo — sin filtros, sin juicio.' },
+        { q:'¿Qué son los shortcuts del chat?', a:'En el chat con ' + aiN + ', podés escribir /hoy, /semana, /perfil o /sprouts para recibir una respuesta personalizada sin tener una conversación completa. Escribí / solo para ver todos los shortcuts disponibles.' },
+        { q:'¿Por qué la planta nunca retrocede?', a:'Porque el cambio real no es lineal. Los días malos no borran los buenos. Tu Sprout refleja el progreso acumulado — no la perfección. Una semana difícil no deshace meses de presencia.' }
+      ]
+    },
+    {
+      id: 'fern',
+      icon: '🌿',
+      title: lang==='en' ? 'About ' + aiN : 'Sobre ' + aiN,
+      items: lang==='en' ? [
+        { q:'What is ' + aiN + '?', a:aiN + ' is an AI companion trained in evidence-based psychology. Not a therapist, not a life coach — a companion who genuinely cares. She has 16+ therapeutic frameworks, knowledge of anxiety, sleep, relationships, trauma, grief, body, work, finances, mindfulness and nutrition.' },
+        { q:'How does ' + aiN + ' learn about me?', a:'Passively, from your conversations. ' + aiN + ' never interrogates — she listens and remembers. Over time she builds a profile of who you are: your work, your relationships, what brings you joy, what worries you. Everything editable from "About you".' },
+        { q:'What can ' + aiN + ' NOT do?', a:aiN + ' cannot diagnose, prescribe, or replace professional care. If something serious is happening, she\'ll always point you toward real professional help. She\'s a complement — never a replacement for human connection or therapy.' },
+        { q:'What about my privacy?', a:'Your conversations are processed by Anthropic\'s API to generate responses. Your private journal is never read by ' + aiN + ' unless you share it. Sprout never sells your data.' },
+        { q:'Why doesn\'t ' + aiN + ' tell me what to do?', a:'Because you already know what you need — she helps you hear yourself. Telling someone what to do rarely generates real change. Accompanying them while they discover their own path does.' }
+      ] : [
+        { q:'¿Qué es ' + aiN + '?', a:aiN + ' es una compañera IA formada en psicología basada en evidencia. No es terapeuta, no es coach — es una compañera que genuinamente le importa la persona. Tiene 16+ frameworks terapéuticos, conocimiento sobre ansiedad, sueño, vínculos, trauma, duelo, cuerpo, trabajo, finanzas, mindfulness y nutrición.' },
+        { q:'¿Cómo aprende ' + aiN + ' sobre mí?', a:'Pasivamente, de tus conversaciones. ' + aiN + ' nunca interroga — escucha y recuerda. Con el tiempo construye un perfil de quién sos: tu trabajo, tus vínculos, lo que te da alegría, lo que te preocupa. Todo editable desde "Sobre vos".' },
+        { q:'¿Qué NO puede hacer ' + aiN + '?', a:aiN + ' no puede diagnosticar, prescribir, ni reemplazar la atención profesional. Si algo serio está pasando, siempre va a orientarte hacia ayuda profesional real. Es un complemento — nunca un reemplazo de la conexión humana o la terapia.' },
+        { q:'¿Qué pasa con mi privacidad?', a:'Tus conversaciones son procesadas por la API de Anthropic para generar respuestas. Tu diario privado nunca es leído por ' + aiN + ' a menos que lo compartas. Sprout nunca vende tus datos.' },
+        { q:'¿Por qué ' + aiN + ' no me dice qué hacer?', a:'Porque vos ya sabés lo que necesitás — ella te ayuda a escucharte. Decirle a alguien qué hacer rara vez genera cambio real. Acompañarlo mientras descubre su propio camino, sí.' }
+      ]
+    },
+    {
+      id: 'cambio',
+      icon: '🔬',
+      title: lang==='en' ? 'About change' : 'Sobre el cambio',
+      items: lang==='en' ? [
+        { q:'Why are small steps more powerful than big ones?', a:'The brain learns through repetition, not intensity. A small action repeated consistently builds stronger neural pathways than a heroic effort done once. This is why Seeds are small by design — not because we aim low, but because we understand how habits really form (Duhigg, Clear).' },
+        { q:'Why does motivation come after action, not before?', a:'We wait to feel motivated to start. But neuroscience shows it works the other way around: action generates dopamine, which generates motivation. Starting — even with the minimum — breaks the cycle. This is called Behavioral Activation (Martell & Jacobson).' },
+        { q:'Why doesn\'t self-criticism help?', a:'Self-criticism activates the threat system in the brain — the same system that activates when there\'s physical danger. In threat mode, creativity, flexibility and learning capacity shut down. Self-compassion, instead, activates the calm system — the one where real change happens (Gilbert).' },
+        { q:'Why does connection matter for change?', a:'The human brain calculates effort assuming others will help. Isolation literally makes everything harder — it\'s not a feeling, it\'s biology. That\'s why Sprout always celebrates human connections and never tries to replace them (Coan — Social Baseline Theory).' }
+      ] : [
+        { q:'¿Por qué los pasos pequeños son más poderosos que los grandes?', a:'El cerebro aprende por repetición, no por intensidad. Una acción pequeña repetida consistentemente construye vías neurales más fuertes que un esfuerzo heroico hecho una sola vez. Por eso las Seeds son pequeñas por diseño — no porque apuntemos bajo, sino porque entendemos cómo se forman realmente los hábitos (Duhigg, Clear).' },
+        { q:'¿Por qué la motivación viene después de la acción y no antes?', a:'Esperamos sentir motivación para arrancar. Pero la neurociencia muestra que funciona al revés: la acción genera dopamina, que genera motivación. Arrancar — aunque sea con lo mínimo — rompe el ciclo. Esto se llama Activación Conductual (Martell & Jacobson).' },
+        { q:'¿Por qué la autocrítica no ayuda?', a:'La autocrítica activa el sistema de amenaza en el cerebro — el mismo que se activa cuando hay peligro físico. En modo amenaza, la creatividad, la flexibilidad y la capacidad de aprender se apagan. La autocompasión, en cambio, activa el sistema de calma — donde ocurre el cambio real (Gilbert).' },
+        { q:'¿Por qué la conexión importa para el cambio?', a:'El cerebro humano calcula el esfuerzo asumiendo que otros van a ayudar. El aislamiento literalmente hace todo más difícil — no es una sensación, es biología. Por eso Sprout siempre celebra los vínculos humanos y nunca intenta reemplazarlos (Coan — Teoría de la Línea Base Social).' }
+      ]
+    }
+  ];
+
+  sections.forEach(function(sec) {
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.overflow = 'hidden';
+
+    var hd = document.createElement('div');
+    hd.style.cssText = 'padding:14px 16px;background:linear-gradient(135deg,var(--mint),var(--b1));border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;cursor:pointer';
+    hd.innerHTML = '<span style="font-size:22px">' + sec.icon + '</span><span style="font-family:var(--fd);font-size:15px;color:var(--g);font-weight:600;flex:1">' + sec.title + '</span><span style="color:var(--t3);font-size:12px">▾</span>';
+
+    var body = document.createElement('div');
+    body.style.display = 'none';
+
+    sec.items.forEach(function(item, i) {
+      var row = document.createElement('div');
+      row.style.cssText = 'border-bottom:' + (i<sec.items.length-1?'1px solid var(--bd)':'none');
+
+      var q = document.createElement('div');
+      q.style.cssText = 'padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px';
+      q.innerHTML = '<span style="font-size:13px;font-weight:600;color:var(--t1)">' + item.q + '</span><span style="color:var(--t3);font-size:11px;flex-shrink:0">▾</span>';
+
+      var a = document.createElement('div');
+      a.style.cssText = 'display:none;padding:0 16px 13px;font-size:13px;color:var(--t2);line-height:1.7';
+      a.textContent = item.a;
+
+      q.onclick = function() {
+        var isOpen = a.style.display !== 'none';
+        a.style.display = isOpen ? 'none' : 'block';
+        q.querySelector('span:last-child').textContent = isOpen ? '▾' : '▴';
+      };
+
+      row.appendChild(q);
+      row.appendChild(a);
+      body.appendChild(row);
+    });
+
+    hd.onclick = function() {
+      var isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      hd.querySelector('span:last-child').textContent = isOpen ? '▾' : '▴';
+    };
+
+    card.appendChild(hd);
+    card.appendChild(body);
+    pg.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════
+// AJUSTES
+// ════════════════════════════════════════
+function renderAjustes() {
+  var pg = el('page-ajustes');
+  pg.innerHTML = '';
+  var lang = S.lang || 'es';
+  pg.appendChild(makePageHd('⚙️', t('settings_title'), ''));
+
+  var card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<div style="padding:0 15px">' +
+    // Language
+    '<div class="setting-row"><div><div class="setting-label">' + (lang==='en'?'Language':'Idioma') + '</div></div>' +
+      '<select class="setting-input" id="set-lang" onchange="changeLang(this.value)">' +
+        '<option value="es"' + (lang==='es'?' selected':'') + '>Español</option>' +
+        '<option value="en"' + (lang==='en'?' selected':'') + '>English</option>' +
+      '</select></div>' +
+    // AI Name
+    '<div class="setting-row"><div><div class="setting-label">' + (lang==='en'?"Companion's name":"Nombre de tu compañera") + '</div><div class="setting-sub">' + (lang==='en'?'Fern by default':'Fern por defecto') + '</div></div>' +
+      '<input type="text" class="setting-input" id="set-ainame" value="' + (S.aiName||'Fern') + '" style="width:110px;text-align:center"></div>' +
+    // AI Gender
+    '<div class="setting-row col"><div><div class="setting-label">' + (lang==='en'?"Companion's gender":"Género de tu compañera") + '</div></div>' +
+      '<div style="display:flex;gap:6px">' +
+        (lang==='en'
+          ? '<button class="ob-gender-btn' + (S.aiGender==='she'?' sel':'') + '" onclick="setAiGender(\'she\',this)" style="flex:none;padding:6px 12px">She</button><button class="ob-gender-btn' + (S.aiGender==='he'?' sel':'') + '" onclick="setAiGender(\'he\',this)" style="flex:none;padding:6px 12px">He</button><button class="ob-gender-btn' + (S.aiGender==='none'?' sel':'') + '" onclick="setAiGender(\'none\',this)" style="flex:none;padding:6px 12px">None</button>'
+          : '<button class="ob-gender-btn' + (S.aiGender==='ella'?' sel':'') + '" onclick="setAiGender(\'ella\',this)" style="flex:none;padding:6px 12px">Ella</button><button class="ob-gender-btn' + (S.aiGender==='el'?' sel':'') + '" onclick="setAiGender(\'el\',this)" style="flex:none;padding:6px 12px">Él</button><button class="ob-gender-btn' + (S.aiGender==='none'?' sel':'') + '" onclick="setAiGender(\'none\',this)" style="flex:none;padding:6px 12px">Sin pref.</button>'
+        ) +
+      '</div></div>' +
+    '<div class="setting-row"><button class="btn primary sm" onclick="saveSettings()">' + t('save_btn') + '</button></div>' +
+    // Account
+    (S.user
+      ? '<div class="setting-row"><div><div class="setting-label">' + (lang==='en'?'Account':'Cuenta') + '</div><div class="setting-sub">' + (S.user.email||'') + '</div></div><button class="btn sm danger" onclick="logout()">' + (lang==='en'?'Sign out':'Salir') + '</button></div>'
+      : '<div class="setting-row"><div><div class="setting-label">' + (lang==='en'?'Account':'Cuenta') + '</div><div class="setting-sub">' + (lang==='en'?'Not signed in':'Sin sesión') + '</div></div><button class="btn soft sm" onclick="showLoginScreen(false)">' + (lang==='en'?'Sign in':'Iniciar sesión') + '</button></div>'
+    ) +
+    // Reset
+    '<div class="setting-row"><div><div class="setting-label">' + (lang==='en'?'Reset app':'Reiniciar app') + '</div><div class="setting-sub">' + (lang==='en'?'Erase all local data.':'Borra todos los datos locales.') + '</div></div><button class="btn sm danger" onclick="resetApp()">' + (lang==='en'?'Reset':'Reiniciar') + '</button></div>' +
+  '</div>';
+  pg.appendChild(card);
+}
+
+function changeLang(lang) { S.lang=lang; saveLocal(); updateNavLabels(); buildSidebar(); renderAjustes(); }
+function setAiGender(g, btn) {
+  S.aiGender = g;
+  document.querySelectorAll('#page-ajustes .ob-gender-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+}
+function saveSettings() {
+  var n = el('set-ainame'); if(n&&n.value.trim()) S.aiName = n.value.trim();
+  saveLocal();
+  if (S.user) callSync('save_user', { ai_name: S.aiName, ai_gender: S.aiGender, language: S.lang }).catch(function(){});
+  updateNavLabels(); buildSidebar(); renderAjustes();
+}
+function resetApp() {
+  var msg = S.lang==='en'?'Erase all local data?':'¿Borrar todos los datos locales?';
+  if (!confirm(msg)) return;
+  localStorage.clear(); location.reload();
+}
+
+// ════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════
+function openModal(title, body) { el('modal-title').textContent=title; el('modal-body').innerHTML=body; el('modal').classList.add('open'); }
+function closeModal() { el('modal').classList.remove('open'); }
+function onModalBg(e) { if(e.target===el('modal')) closeModal(); }
+
+// ════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════
+function el(id) { return document.getElementById(id); }
+function val(id) { var e=el(id); return e?e.value.trim():''; }
+function setText(id, text) { var e=el(id); if(e) e.textContent=text; }
+function makePageHd(icon, title, desc) {
+  var div = document.createElement('div');
+  div.className = 'page-hd';
+  div.innerHTML = '<div class="page-hd-title">' + icon + ' ' + title + '</div>' + (desc?'<div class="page-hd-desc">'+desc+'</div>':'');
+  return div;
+}
+
+// ════════════════════════════════════════
+// START
+// ════════════════════════════════════════
+boot();
+</script>
+</body>
+</html>
