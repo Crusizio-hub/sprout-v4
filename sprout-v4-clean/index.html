@@ -646,6 +646,91 @@ function hideLoading() {
 function showApp() {
   var app = document.getElementById('app');
   if (app) { app.style.display = 'flex'; buildSidebar(); updateNavLabels(); nav('inicio'); }
+  if (!localStorage.getItem('sp4_tutorial_done')) setTimeout(showTutorial, 700);
+}
+
+// ════════════════════════════════════════
+// TUTORIAL (primera vez en el app)
+// ════════════════════════════════════════
+var tutStep = 0;
+var tutSlides = null;
+
+function showTutorial() {
+  var isEN = (S.lang || 'es') === 'en';
+  var aiN  = S.aiName || 'Fern';
+  tutSlides = [
+    {
+      icon: '🏠',
+      title: isEN ? 'Your home screen' : 'Tu pantalla de inicio',
+      text:  isEN
+        ? 'Every day starts here. Check in your mood, see your seeds for today, and stay in touch with ' + aiN + '.'
+        : 'Cada día empieza acá. Registrá tu ánimo, mirá tus seeds de hoy, y mantente en contacto con ' + aiN + '.'
+    },
+    {
+      icon: '🌱',
+      title: 'Seeds',
+      text:  isEN
+        ? '"Walk 15 minutes" is a seed. "Exercise" is not. One concrete small action for today — the more specific, the easier to start.'
+        : '"Caminar 15 minutos" es una seed. "Hacer ejercicio" no lo es. Una acción concreta y pequeña para hoy — cuanto más específica, más fácil arrancar.'
+    },
+    {
+      icon: '🌿',
+      title: 'Sprouts',
+      text:  isEN
+        ? 'Directions in life, not goals. Seeds water your Sprouts. Over time they grow — from seed 🌱 to young plant 🪴 to tree 🌳.'
+        : 'Direcciones de vida, no metas. Las seeds riegan tus Sprouts. Con el tiempo crecen — de semilla 🌱 a planta joven 🪴 a árbol 🌳.'
+    },
+    {
+      icon: '💬',
+      title: aiN,
+      text:  isEN
+        ? aiN + ' learns about you over time — from your conversations, not interrogation. No judgment, no unsolicited advice. Talk whenever you need.'
+        : aiN + ' aprende sobre vos con el tiempo — de las conversaciones, no de interrogatorios. Sin juicios, sin consejos que no pediste. Hablale cuando necesitás.'
+    }
+  ];
+  tutStep = 0;
+  renderTutSlide();
+}
+
+function renderTutSlide() {
+  if (!tutSlides) return;
+  var isEN  = (S.lang || 'es') === 'en';
+  var slide = tutSlides[tutStep];
+  var isLast = tutStep === tutSlides.length - 1;
+  var dots = tutSlides.map(function(_, i) {
+    return '<div style="width:' + (i===tutStep?'20':'7') + 'px;height:7px;border-radius:4px;background:' + (i===tutStep?'var(--g)':'var(--b3)') + ';transition:all .25s"></div>';
+  }).join('');
+  var mt = document.getElementById('modal-title');
+  if (mt) { mt.textContent = ''; mt.style.margin = '0'; }
+  el('modal-body').innerHTML =
+    '<div style="text-align:center;padding:6px 0 4px">' +
+      '<div style="font-size:52px;margin-bottom:14px">' + slide.icon + '</div>' +
+      '<div style="font-family:var(--fd);font-size:19px;color:var(--t1);margin-bottom:12px">' + slide.title + '</div>' +
+      '<div style="font-size:13px;color:var(--t2);line-height:1.75;margin-bottom:24px;padding:0 4px">' + slide.text + '</div>' +
+      '<div style="display:flex;justify-content:center;gap:6px;margin-bottom:22px">' + dots + '</div>' +
+      '<button class="btn primary full" onclick="tutNext()" style="margin-bottom:8px">' +
+        (isLast ? (isEN ? 'Start' : 'Empezar') : (isEN ? 'Next →' : 'Siguiente →')) +
+      '</button>' +
+      (tutStep > 0 ? '<button class="btn ghost full" style="margin-bottom:4px" onclick="tutPrev()">' + (isEN ? 'Back' : 'Atrás') + '</button>' : '') +
+      '<button style="background:none;border:none;font-size:11px;color:var(--t3);cursor:pointer;padding:4px 0;display:block;margin:0 auto" onclick="tutSkip()">' +
+        (isEN ? 'Skip' : 'Saltar') +
+      '</button>' +
+    '</div>';
+  el('modal').classList.add('open');
+}
+
+function tutNext() {
+  if (tutSlides && tutStep < tutSlides.length - 1) { tutStep++; renderTutSlide(); }
+  else tutSkip();
+}
+function tutPrev() {
+  if (tutStep > 0) { tutStep--; renderTutSlide(); }
+}
+function tutSkip() {
+  localStorage.setItem('sp4_tutorial_done', '1');
+  var mt = document.getElementById('modal-title');
+  if (mt) { mt.textContent = ''; mt.style.margin = ''; }
+  closeModal();
 }
 
 // ════════════════════════════════════════
