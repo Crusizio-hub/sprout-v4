@@ -535,10 +535,11 @@ async function callFern(messages, system) {
 // BOOT
 // ════════════════════════════════════════
 async function boot() {
-  // Load config from server
+  // Load config from server (5s timeout so a dead function never blocks boot)
   try {
-    var res = await fetch('/api/config');
-    CFG = await res.json();
+    var timeoutP = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, 5000); });
+    var fetchP   = fetch('/api/config').then(function(r){ return r.json(); });
+    CFG = await Promise.race([fetchP, timeoutP]);
   } catch(e) {
     console.error('Config load failed:', e);
   }
