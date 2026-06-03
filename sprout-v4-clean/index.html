@@ -163,6 +163,9 @@ button{cursor:pointer}
 .seed-progress-bar{height:2px;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 @keyframes seedBloom{0%{transform:scale(1)}30%{transform:scale(1.18)}60%{transform:scale(.95)}100%{transform:scale(1)}}
 .seed-check.bloom{animation:seedBloom .4s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(60px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes toastOut{0%,70%{opacity:1}100%{opacity:0}}
+.growth-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2d5016;color:#fff;border-radius:14px;padding:14px 20px;z-index:500;font-size:13px;white-space:nowrap;animation:toastIn .35s ease,toastOut 4s ease forwards;pointer-events:none}
 
 /* SPROUTS */
 .sprout-card{border-radius:var(--r2);border:1.5px solid var(--bd);background:var(--b0);overflow:hidden}
@@ -941,6 +944,11 @@ function renderInicio() {
   if (mood === 'hard') { pg.appendChild(makeHardDay()); return; }
 
   pg.appendChild(makeCheckin(greet + name, mood));
+  if (shouldShowWeeklyReview()) {
+    var wBanner = makeWeeklyReviewBanner();
+    pg.appendChild(wBanner);
+    populateWeeklyReview(wBanner);
+  }
   if (mood && mood !== 'hard') setTimeout(function() { injectMoodResponse(pg, mood); }, 50);
   if (!mood) return;
 
@@ -1404,12 +1412,54 @@ function makeSproutCard(sp) {
   var lang  = S.lang || 'es';
   var aiN   = S.aiName || 'Fern';
   var color = sp.color || '#4a7c59';
+  var state = getSproutState(sp);
   var linked = (S.seeds||[]).filter(function(s){return s.sprout_id===sp.id;});
+  var linkedIds = linked.map(function(s){return s.id;});
 
-  var sofiaSection = sp.reflection
+  // Days since creation
+  var created = sp.created_at ? new Date(sp.created_at) : new Date();
+  var daysSince = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
+
+  // Total completed seeds for this sprout
+  var completedTotal = (S.seeds_log||[]).filter(function(l){return linkedIds.indexOf(l.seed_id)!==-1&&l.done;}).length;
+
+  // Progress bar toward next state
+  var targets = [{days:15,seeds:5},{days:30,seeds:12},{days:60,seeds:25}];
+  var progressHtml = '';
+  if (state < 3) {
+    var tgt = targets[state];
+    var daysLeft = Math.max(0, tgt.days - daysSince);
+    var pct = Math.min(100, Math.round(((daysSince/tgt.days) + (completedTotal/tgt.seeds)) / 2 * 100));
+    progressHtml =
+      '<div style="padding:10px 15px;border-bottom:1px solid var(--bd)">' +
+        '<div style="font-size:11px;color:var(--t3);margin-bottom:6px">Día ' + daysSince + ' · ' + completedTotal + ' seeds — próximo estado en ' + daysLeft + ' días</div>' +
+        '<div style="height:4px;background:var(--b2);border-radius:2px;overflow:hidden">' +
+          '<div style="height:4px;width:' + pct + '%;background:' + color + ';border-radius:2px;transition:width .6s"></div>' +
+        '</div>' +
+      '</div>';
+  } else {
+    progressHtml = '<div style="padding:10px 15px;border-bottom:1px solid var(--bd);font-size:11px;color:var(--g2)">Día ' + daysSince + ' · ' + completedTotal + ' seeds completadas 🌳</div>';
+  }
+
+  // Inactivity phrase: 7+ days since last seed AND sprout is 7+ days old
+  var inactivityHtml = '';
+  if (daysSince >= 7) {
+    var lastDoneDate = null;
+    (S.seeds_log||[]).forEach(function(l){
+      if (linkedIds.indexOf(l.seed_id)!==-1 && l.done && (!lastDoneDate || l.date > lastDoneDate)) lastDoneDate = l.date;
+    });
+    var sinceLastDone = lastDoneDate ? Math.floor((new Date()-new Date(lastDoneDate))/(1000*60*60*24)) : 9999;
+    if (sinceLastDone >= 7) {
+      inactivityHtml = '<div style="padding:10px 15px;border-bottom:1px solid var(--bd);font-style:italic;font-size:12px;color:var(--t3);line-height:1.6">Hace un tiempo que no te acercás a \'' + sp.name + '\'. Sin apuro — ¿qué está pasando?</div>';
+    }
+  }
+
+  // Fern reflection
+  var reflectionHtml = sp.reflection
     ? '<div class="sprout-sofia"><div class="sofia-av" style="width:28px;height:28px;font-size:13px">🌿</div><div><div class="sprout-sofia-name">' + aiN + '</div><div class="sprout-sofia-msg">' + sp.reflection + '</div></div></div>'
     : '';
 
+  // Seeds connected today
   var seedsSection = '';
   if (linked.length) {
     var rows = linked.map(function(s) {
@@ -1423,14 +1473,22 @@ function makeSproutCard(sp) {
   var div = document.createElement('div');
   div.className = 'sprout-card';
   div.innerHTML =
-    '<div class="sprout-card-hd" style="background:linear-gradient(135deg,' + color + '18,' + color + '08)">' +
+    // Header
+    '<div class="sprout-card-hd" style="background:linear-gradient(135deg,' + color + '28,' + color + '10)">' +
       '<div style="display:flex;align-items:flex-start;gap:12px">' +
         '<span style="font-size:28px;flex-shrink:0">' + (sp.icon||'🌿') + '</span>' +
         '<div style="flex:1"><div class="sprout-name">' + sp.name + '</div>' + (sp.why?'<div class="sprout-why">"' + sp.why + '"</div>':'') + '</div>' +
         '<button style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:16px" onclick="deleteSprout(\'' + sp.id + '\')">✕</button>' +
       '</div>' +
     '</div>' +
-    sofiaSection + seedsSection +
+    // Plant visual — clickable
+    '<div onclick="openSproutReflection_byId(\'' + sp.id + '\')" style="cursor:pointer;display:flex;justify-content:center;align-items:center;padding:14px;background:' + color + '18;border-bottom:1px solid var(--bd)">' +
+      getSproutSVG(state) +
+    '</div>' +
+    progressHtml +
+    inactivityHtml +
+    reflectionHtml +
+    seedsSection +
     '<div class="sprout-actions">' +
       '<button class="btn soft sm" onclick="connectSeedToSprout(\'' + sp.id + '\')">' + t('connect_seed') + '</button>' +
       '<button class="btn soft sm" onclick="sproutSuggestSeeds(\'' + sp.id + '\')">✨ ' + aiN + ' ' + t('suggests') + '</button>' +
@@ -1438,6 +1496,236 @@ function makeSproutCard(sp) {
       (sp.reflection ? '' : '<button class="btn ghost sm" onclick="sproutReflect(\'' + sp.id + '\')">🌿 ' + aiN + ' ' + t('reflects') + '</button>') +
     '</div>';
   return div;
+}
+
+// ════════════════════════════════════════
+// SPROUT VISUAL + GROWTH
+// ════════════════════════════════════════
+function getSproutSVG(state) {
+  if (state === 0) {
+    return '<svg viewBox="0 0 120 140" width="120" height="140" xmlns="http://www.w3.org/2000/svg">' +
+      '<ellipse cx="60" cy="122" rx="38" ry="7" fill="#8B6914" opacity=".3"/>' +
+      '<ellipse cx="60" cy="118" rx="28" ry="5" fill="#8B6914" opacity=".45"/>' +
+      '<ellipse cx="60" cy="114" rx="20" ry="6" fill="#6a4e14" opacity=".7"/>' +
+      '<ellipse cx="60" cy="108" rx="9" ry="11" fill="#8B6914"/>' +
+      '<ellipse cx="60" cy="107" rx="7" ry="9" fill="#a07828"/>' +
+      '<path d="M59 100 Q60 94 61 100" stroke="#4a7c59" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="60" cy="92" rx="4" ry="5" fill="#6a9e78" opacity=".85"/>' +
+    '</svg>';
+  }
+  if (state === 1) {
+    return '<svg viewBox="0 0 120 140" width="120" height="140" xmlns="http://www.w3.org/2000/svg">' +
+      '<ellipse cx="60" cy="124" rx="34" ry="6" fill="#8B6914" opacity=".3"/>' +
+      '<ellipse cx="60" cy="120" rx="24" ry="5" fill="#8B6914" opacity=".4"/>' +
+      '<line x1="60" y1="120" x2="60" y2="78" stroke="#6a9e78" stroke-width="3" stroke-linecap="round"/>' +
+      '<ellipse cx="49" cy="94" rx="10" ry="7" fill="#4a7c59" transform="rotate(-30 49 94)"/>' +
+      '<line x1="60" y1="94" x2="49" y2="94" stroke="#6a9e78" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<ellipse cx="72" cy="84" rx="10" ry="7" fill="#6a9e78" transform="rotate(25 72 84)"/>' +
+      '<line x1="60" y1="84" x2="72" y2="84" stroke="#6a9e78" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<ellipse cx="60" cy="75" rx="5" ry="6" fill="#4a7c59"/>' +
+    '</svg>';
+  }
+  if (state === 2) {
+    return '<svg viewBox="0 0 120 140" width="120" height="140" xmlns="http://www.w3.org/2000/svg">' +
+      '<ellipse cx="60" cy="126" rx="34" ry="6" fill="#8B6914" opacity=".3"/>' +
+      '<line x1="60" y1="125" x2="60" y2="52" stroke="#6a9e78" stroke-width="4.5" stroke-linecap="round"/>' +
+      '<ellipse cx="43" cy="108" rx="15" ry="9" fill="#4a7c59" transform="rotate(-25 43 108)"/>' +
+      '<line x1="60" y1="108" x2="43" y2="108" stroke="#6a9e78" stroke-width="1.5"/>' +
+      '<ellipse cx="78" cy="98" rx="15" ry="9" fill="#6a9e78" transform="rotate(20 78 98)"/>' +
+      '<line x1="60" y1="98" x2="78" y2="98" stroke="#6a9e78" stroke-width="1.5"/>' +
+      '<ellipse cx="40" cy="84" rx="13" ry="8" fill="#4a7c59" transform="rotate(-35 40 84)"/>' +
+      '<line x1="60" y1="84" x2="40" y2="84" stroke="#6a9e78" stroke-width="1.5"/>' +
+      '<ellipse cx="80" cy="72" rx="13" ry="8" fill="#6a9e78" transform="rotate(30 80 72)"/>' +
+      '<line x1="60" y1="72" x2="80" y2="72" stroke="#6a9e78" stroke-width="1.5"/>' +
+      '<ellipse cx="60" cy="57" rx="10" ry="13" fill="#4a7c59" transform="rotate(5 60 57)"/>' +
+    '</svg>';
+  }
+  return '<svg viewBox="0 0 120 140" width="120" height="140" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M52 128 Q44 132 36 136" stroke="#8B6914" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/>' +
+    '<path d="M55 130 Q50 134 44 138" stroke="#8B6914" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>' +
+    '<path d="M68 128 Q76 132 84 136" stroke="#8B6914" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/>' +
+    '<path d="M65 130 Q70 134 76 138" stroke="#8B6914" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>' +
+    '<rect x="53" y="68" width="14" height="60" rx="7" fill="#8B6914"/>' +
+    '<rect x="55" y="68" width="6" height="60" rx="3" fill="#a07828" opacity=".4"/>' +
+    '<ellipse cx="60" cy="72" rx="34" ry="26" fill="#4a7c59"/>' +
+    '<ellipse cx="40" cy="80" rx="20" ry="16" fill="#6a9e78"/>' +
+    '<ellipse cx="80" cy="76" rx="20" ry="16" fill="#4a7c59"/>' +
+    '<ellipse cx="60" cy="52" rx="24" ry="20" fill="#6a9e78"/>' +
+    '<ellipse cx="60" cy="42" rx="16" ry="14" fill="#4a7c59"/>' +
+    '<ellipse cx="50" cy="58" rx="5" ry="4" fill="#6a9e78" opacity=".5"/>' +
+    '<ellipse cx="72" cy="62" rx="4" ry="3" fill="#6a9e78" opacity=".4"/>' +
+  '</svg>';
+}
+
+function getSproutState(sprout) {
+  var created = sprout.created_at ? new Date(sprout.created_at) : new Date();
+  var days = Math.floor((new Date() - created) / (1000 * 60 * 60 * 24));
+  var connectedIds = (S.seeds||[]).filter(function(s){return s.sprout_id===sprout.id;}).map(function(s){return s.id;});
+  var completed = (S.seeds_log||[]).filter(function(l){return connectedIds.indexOf(l.seed_id)!==-1&&l.done;}).length;
+  var newState = 0;
+  if (days >= 60 && completed >= 25 && sprout.reflection) newState = 3;
+  else if (days >= 30 && completed >= 12) newState = 2;
+  else if (days >= 15 && completed >= 5) newState = 1;
+  var saved = sprout.state || 0;
+  var final = Math.max(newState, saved);
+  if (final > saved) {
+    sprout.state = final;
+    if (S.user) callSync('save_sprout', sprout).catch(function(){});
+    showGrowthToast(final, sprout.name);
+  }
+  return final;
+}
+
+function showGrowthToast(state, name) {
+  var msgs = {
+    1: 'Tu Sprout brotó 🌿 Los pequeños pasos se acumulan.',
+    2: 'Tu Sprout creció 🪴 Algo real está pasando.',
+    3: 'Tu Sprout es un árbol 🌳 Esto ya es tuyo para siempre.'
+  };
+  var fernMsgs = {
+    1: 'Noté que tu Sprout \'' + name + '\' brotó esta semana. ¿Lo sentís así también?',
+    2: 'Tu Sprout \'' + name + '\' está creciendo de verdad. ¿Qué cambió en vos desde que lo plantaste?',
+    3: '\'' + name + '\' se convirtió en árbol. Eso no pasa solo — lo construiste vos. ¿Qué querés hacer con eso?'
+  };
+  var msg = msgs[state]; if (!msg) return;
+  var existing = document.querySelector('.growth-toast'); if (existing) existing.remove();
+  var toast = document.createElement('div');
+  toast.className = 'growth-toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 4100);
+  if (fernMsgs[state]) {
+    if (!S.messages) S.messages = [];
+    S.messages.push({ role:'ai', content:fernMsgs[state], date:today() });
+  }
+}
+
+function checkSproutProgress(spId) {
+  var sp = (S.sprouts||[]).find(function(s){return s.id===spId;});
+  if (sp) getSproutState(sp);
+}
+
+function openSproutReflection_byId(spId) {
+  var sp = (S.sprouts||[]).find(function(s){return s.id===spId;});
+  if (sp) openSproutReflection(sp);
+}
+
+async function openSproutReflection(sp) {
+  var state = getSproutState(sp);
+  openModal(sp.name,
+    '<div style="text-align:center;padding:20px 0"><div style="font-style:italic;color:var(--t3);font-size:14px;font-family:var(--fd)">🌿 Fern está pensando...</div></div>'
+  );
+  var sys = 'Generá UNA sola pregunta reflexiva corta sobre este Sprout. Que invite a la introspección sin presionar. Máximo 15 palabras. Sin signos de exclamación. Sin markdown. En tono cálido e informal.';
+  var ctx = 'Sprout: "' + sp.name + '"' + (sp.why ? '. Por qué: "' + sp.why + '"' : '');
+  var question = await callFern([{role:'user',content:ctx}], sys);
+  var mb = el('modal-body'); if (!mb) return;
+  var qEsc = question.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  mb.innerHTML =
+    '<div style="display:flex;justify-content:center;margin-bottom:14px">' + getSproutSVG(state) + '</div>' +
+    '<div style="font-family:var(--fd);font-size:18px;color:var(--g);text-align:center;margin-bottom:14px">' + sp.name + '</div>' +
+    '<div style="font-family:var(--fd);font-style:italic;font-size:16px;color:var(--t1);text-align:center;margin-bottom:22px;line-height:1.65">' + question + '</div>' +
+    '<button class="btn primary full" style="margin-bottom:8px" onclick="openSproutJournalModal(\'' + sp.id + '\')">📓 Escribir en el diario</button>' +
+    '<button class="btn ghost full" onclick="talkAboutQuestion(\'' + qEsc + '\')">💬 Hablar con Fern sobre esto</button>';
+}
+
+function openSproutJournalModal(spId) {
+  var mb = el('modal-body'); if (!mb) return;
+  mb.innerHTML =
+    '<div class="field"><textarea id="sprout-journal-txt" rows="5" placeholder="Escribí lo que sentís..." style="font-size:14px"></textarea></div>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn primary" style="flex:1" onclick="saveSproutJournal(\'' + spId + '\')">Guardar</button>' +
+      '<button class="btn ghost" onclick="closeModal()">Cancelar</button>' +
+    '</div>';
+  setTimeout(function(){ var e=el('sprout-journal-txt'); if(e) e.focus(); }, 100);
+}
+
+async function saveSproutJournal(spId) {
+  var e = el('sprout-journal-txt');
+  var text = e ? e.value.trim() : '';
+  if (!text) return;
+  await callSync('save_sprout_journal', { sprout_id: spId, content: text });
+  closeModal();
+}
+
+function talkAboutQuestion(question) {
+  closeModal();
+  nav('sofia');
+  setTimeout(function(){
+    var inp = el('chat-input');
+    if (inp) { inp.value = '> "' + question + '"\n'; inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }, 300);
+}
+
+// ════════════════════════════════════════
+// WEEKLY REVIEW (CAMBIO 6)
+// ════════════════════════════════════════
+function shouldShowWeeklyReview() {
+  var last = localStorage.getItem('last_weekly_review');
+  if (last) {
+    var diff = Math.floor((new Date() - new Date(last)) / (1000 * 60 * 60 * 24));
+    if (diff <= 6) return false;
+  }
+  if (new Date().getDay() === 0) return true;
+  var counts = [0,0,0,0,0,0,0];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(); d.setDate(d.getDate() - i);
+    var ds = d.toISOString().slice(0,10);
+    counts[d.getDay()] = (S.seeds_log||[]).filter(function(l){return l.date===ds&&l.done;}).length;
+  }
+  var maxVal = Math.max.apply(null, counts);
+  return maxVal > 0 && counts[new Date().getDay()] === maxVal;
+}
+
+function makeWeeklyReviewBanner() {
+  var div = document.createElement('div');
+  div.id = 'weekly-review-banner';
+  div.style.cssText = 'background:linear-gradient(135deg,var(--mint),var(--b2));border:1.5px solid var(--sage);border-radius:18px;padding:16px';
+  div.innerHTML =
+    '<div style="font-family:var(--fd);font-size:16px;color:var(--g);margin-bottom:10px">Tu semana 🌿</div>' +
+    '<div id="wr-summary" style="font-size:13px;color:var(--t2);line-height:1.7;font-style:italic;font-family:var(--fd);margin-bottom:10px">🌿 Cargando...</div>' +
+    '<div id="wr-question" style="font-size:13px;color:var(--t1);line-height:1.6;margin-bottom:14px"></div>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn soft" id="wr-reply-btn" style="flex:1">💬 Responderle a Fern</button>' +
+      '<button class="btn ghost" onclick="closeWeeklyReview()">Cerrar</button>' +
+    '</div>';
+  return div;
+}
+
+async function populateWeeklyReview(container) {
+  var today_ = new Date();
+  var weekDates = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date(today_); d.setDate(d.getDate() - i);
+    weekDates.push(d.toISOString().slice(0,10));
+  }
+  var weekDone = (S.seeds_log||[]).filter(function(l){return weekDates.indexOf(l.date)!==-1&&l.done;}).length;
+  var sproutNames = (S.sprouts||[]).map(function(s){return s.name;}).join(', ');
+  var ctx = 'Seeds completadas esta semana: ' + weekDone + '. Sprouts activos: ' + (sproutNames||'ninguno') + '.';
+  var sum = await callFern([{role:'user',content:ctx}], 'Sos Fern en Sprout. Escribí un resumen cálido y personal de la semana en 2-3 oraciones. Sin markdown. Sin listas. Tono cercano, sin juicio.');
+  var qst = await callFern([{role:'user',content:ctx}], 'Generá UNA sola pregunta de cierre para reflexionar sobre la semana. Máximo 12 palabras. Sin signos de exclamación. Sin markdown. Tono cálido.');
+  var sumEl = document.getElementById('wr-summary');
+  var qEl   = document.getElementById('wr-question');
+  var btn   = document.getElementById('wr-reply-btn');
+  if (sumEl) sumEl.textContent = sum;
+  if (qEl)   qEl.textContent   = qst;
+  if (btn) {
+    var qEsc = qst.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    btn.setAttribute('onclick', 'replyToWeeklyReview(\'' + qEsc + '\')');
+  }
+}
+
+function replyToWeeklyReview(question) {
+  closeWeeklyReview();
+  nav('sofia');
+  setTimeout(function(){
+    var inp = el('chat-input');
+    if (inp) { inp.value = '> "' + question + '"\n'; inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }, 300);
+}
+
+function closeWeeklyReview() {
+  localStorage.setItem('last_weekly_review', today());
+  renderInicio();
 }
 
 function showAddSprout() {
