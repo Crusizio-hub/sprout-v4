@@ -1982,7 +1982,7 @@ function showShortcutMenu() {
   var menu  = document.getElementById('shortcut-menu');
   if (!menu) return;
   menu.innerHTML = list.map(function(s) {
-    return '<button class="shortcut-item" onclick="runShortcut('' + s.cmd + '')">' +
+    return '<button class="shortcut-item" onclick="runShortcut(\'' + s.cmd + '\')">' +
       '<span class="shortcut-cmd">' + s.cmd + '</span>' +
       '<span class="shortcut-desc">' + s.desc + '</span>' +
     '</button>';
