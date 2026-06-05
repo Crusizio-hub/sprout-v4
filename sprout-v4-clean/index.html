@@ -510,7 +510,10 @@ async function callSync(action, data) {
   }
 }
 
-async function callFern(messages, system) {
+async function callFern(messages, system, onChunk) {
+  var fallback = S.lang === 'en'
+    ? "My AI took a little breath — it happens sometimes. Try again in a moment 🌿"
+    : 'Mi IA se tomó un pequeño respiro — pasa a veces. Intentá de nuevo en un momento 🌿';
   try {
     var res = await fetch('/api/chat', {
       method: 'POST',
@@ -522,12 +525,41 @@ async function callFern(messages, system) {
         save_message: !!S.user
       })
     });
-    if (!res.ok) return S.lang === 'en' ? "I'm having trouble connecting. Try again in a moment 🌿" : 'Estoy teniendo problemas para conectarme. Intentá de nuevo en un momento 🌿';
-    var data = await res.json();
-    if (data.error) return data.error;
-    return data.content && data.content[0] ? data.content[0].text : '';
+    if (!res.ok) return fallback;
+
+    var ct = res.headers.get('content-type') || '';
+
+    // Respuesta JSON (fallback de error del servidor)
+    if (!ct.includes('text/event-stream')) {
+      var data = await res.json();
+      if (data.error) return data.error;
+      return data.content && data.content[0] ? data.content[0].text : '';
+    }
+
+    // SSE streaming
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var full = '';
+    try {
+      while (true) {
+        var r = await reader.read();
+        if (r.done) break;
+        var lines = decoder.decode(r.value, { stream: true }).split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (!line.startsWith('data: ')) continue;
+          var raw = line.slice(6).trim();
+          if (raw === '[DONE]') continue;
+          try {
+            var p = JSON.parse(raw);
+            if (p.text) { full += p.text; if (onChunk) onChunk(p.text); }
+          } catch(_) {}
+        }
+      }
+    } catch(_) {}
+    return full;
   } catch(e) {
-    return S.lang === 'en' ? "Connection error. Check your internet 🌿" : 'Error de conexión. Revisá tu internet 🌿';
+    return fallback;
   }
 }
 
@@ -2160,14 +2192,14 @@ async function runShortcut(cmd) {
 
   if (!userPrompt) return;
 
-  // Show typing
-  var typing = null;
+  // Burbuja vacía de Fern para streaming
+  var streamBubble2 = null;
   if (msgs) {
-    typing = document.createElement('div');
-    typing.className = 'msg ai';
-    typing.innerHTML = '<div class="msg-who">' + aiN + '</div><div class="bubble"><span class="typing"><span></span><span></span><span></span></span></div>';
-    msgs.appendChild(typing);
-    msgs.scrollTop = msgs.scrollHeight;
+    var sd2 = document.createElement('div'); sd2.className = 'msg ai';
+    var sw2 = document.createElement('div'); sw2.className = 'msg-who'; sw2.textContent = aiN;
+    streamBubble2 = document.createElement('div'); streamBubble2.className = 'bubble';
+    sd2.appendChild(sw2); sd2.appendChild(streamBubble2);
+    msgs.appendChild(sd2); msgs.scrollTop = msgs.scrollHeight;
   }
 
   var history = (S.messages||[]).slice(-10).map(function(m){
@@ -2175,11 +2207,12 @@ async function runShortcut(cmd) {
   });
   history.push({ role:'user', content: userPrompt });
 
-  var reply = await callFern(history, systemPrompt);
-  if (typing) typing.remove();
+  var reply = await callFern(history, systemPrompt, function(chunk) {
+    if (streamBubble2) { streamBubble2.textContent += chunk; if (msgs) msgs.scrollTop = msgs.scrollHeight; }
+  });
+  if (streamBubble2) streamBubble2.textContent = stripMarkdown(reply);
   if (!S.messages) S.messages = [];
   S.messages.push({ role:'ai', content:reply, date:today() });
-  if (msgs) { appendBubble(msgs, 'ai', reply); msgs.scrollTop = msgs.scrollHeight; }
 }
 
 async function sendMsg() {
@@ -2196,13 +2229,14 @@ async function sendMsg() {
   var msgs = el('chat-msgs');
   if (msgs) { appendBubble(msgs, 'user', text); msgs.scrollTop = msgs.scrollHeight; }
 
-  var typing = null;
+  // Burbuja vacía de Fern para streaming
+  var streamBubble = null;
   if (msgs) {
-    typing = document.createElement('div');
-    typing.className = 'msg ai';
-    typing.innerHTML = '<div class="msg-who">' + (S.aiName||'Fern') + '</div><div class="bubble"><span class="typing"><span></span><span></span><span></span></span></div>';
-    msgs.appendChild(typing);
-    msgs.scrollTop = msgs.scrollHeight;
+    var sd = document.createElement('div'); sd.className = 'msg ai';
+    var sw = document.createElement('div'); sw.className = 'msg-who'; sw.textContent = S.aiName||'Fern';
+    streamBubble = document.createElement('div'); streamBubble.className = 'bubble';
+    sd.appendChild(sw); sd.appendChild(streamBubble);
+    msgs.appendChild(sd); msgs.scrollTop = msgs.scrollHeight;
   }
 
   extractProfile(text);
@@ -2210,11 +2244,12 @@ async function sendMsg() {
   var history = S.messages.slice(-45).map(function(m) {
     return { role: m.role==='ai'?'assistant':'user', content: m.content };
   });
-  var reply = await callFern(history, buildSofiaSystem());
+  var reply = await callFern(history, buildSofiaSystem(), function(chunk) {
+    if (streamBubble) { streamBubble.textContent += chunk; if (msgs) msgs.scrollTop = msgs.scrollHeight; }
+  });
 
-  if (typing) typing.remove();
+  if (streamBubble) streamBubble.textContent = stripMarkdown(reply);
   S.messages.push({ role:'ai', content:reply, date:today() });
-  if (msgs) { appendBubble(msgs, 'ai', reply); msgs.scrollTop = msgs.scrollHeight; }
 }
 
 // ════════════════════════════════════════
